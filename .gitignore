@@ -1,0 +1,54 @@
+﻿# ── Python ──────────────────────────────────────────────
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# ── Credenciales OAuth de Gmail (NUNCA versionar) ───────
+mcp-gmail/token*.json
+mcp-gmail/credentials*.json
+**/token*.json
+**/credentials*.json
+
+# ── Datos personales de clientes (memoria, no versionar) ─
+# La memoria vive en ficheros; el git solo guarda código y
+# plantillas. Si el fichero no existe, el sistema lo crea.
+datos/maestro_clientes.json
+datos/identidad.json
+datos/seguimientos.json
+datos/presupuestos.json
+datos/programaciones.json
+datos/citas.json
+datos/config.json
+datos/meses/
+datos/memoria/
+datos/_mock/
+datos/archivo/
+datos/acciones/
+datos/corridas/
+datos/informe_importacion.json
+datos/_debug*
+datos/serv_*.log
+
+# ── Carpeta de entrada (ficheros reales de clientes) ───────
+entrada/*.xls
+entrada/*.xlsx
+entrada/*.csv
+entrada/procesados/
+
+# ── Vistas generadas (regenerables, con datos personales) ────
+excel/
+
+# ── Sistema / editor ─────────────────────────────────────
+Thumbs.db
+desktop.ini
+*.tmp
+tests/_*.tmp.js
+datos/ventas.json
+
+# ── Config real del runtime agéntico (la plantilla SÍ va al git) ──
+.gemini/settings.json
+
+# ── Capturas temporales de desarrollo (las del repo van en docs/img/) ──
+.playwright-mcp/
+docs/manual_usuario.pdf

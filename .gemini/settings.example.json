@@ -1,0 +1,10 @@
+{
+  "_comentario": "Copia este fichero a .gemini/settings.json para que Gemini CLI vea las herramientas MCP de Gmail/Calendar. Detalles en docs/CONFIGURACION.md (Paso 1, Opción A).",
+  "mcpServers": {
+    "gmail-calendar": {
+      "command": ".venv\\Scripts\\python.exe",
+      "args": ["mcp-gmail\\servidor_mcp.py"],
+      "cwd": "."
+    }
+  }
+}

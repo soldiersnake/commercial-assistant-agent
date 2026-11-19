@@ -1,0 +1,62 @@
+{
+  "_comentario": "Configuración del sistema. COPIA este fichero como datos/config.json y rellena TUS datos. datos/config.json NO va al git (es información personal/empresarial).",
+  "empresa": {
+    "nombre": "Mi Empresa S.L.",
+    "dominios": [
+      "miempresa.com"
+    ],
+    "contactos_corporativos": [
+      {
+        "nombre": "Nombre Apellido",
+        "email": "averias@miempresa.com",
+        "area": "Averías 24 h / Reclamaciones",
+        "telefono": "000 000 000"
+      },
+      {
+        "nombre": "Nombre Apellido",
+        "email": "administracion@miempresa.com",
+        "area": "Administración — estado de trabajos",
+        "telefono": null
+      },
+      {
+        "nombre": "Nombre Apellido",
+        "email": "facturacion@miempresa.com",
+        "area": "Facturación",
+        "telefono": null
+      },
+      {
+        "nombre": "Nombre Apellido",
+        "email": "tecnico@miempresa.com",
+        "area": "Departamento técnico",
+        "telefono": null
+      }
+    ]
+  },
+  "asesor": {
+    "nombre": "Tu Nombre y Apellidos",
+    "cargo": "Asesor comercial",
+    "email": "tu.email@miempresa.com"
+  },
+  "reglas_presupuestos": {
+    "ventana_firma_default_dias": 90,
+    "intervalo_reclamacion_dias": 15,
+    "max_reclamaciones": null
+  },
+  "reglas_captacion": {
+    "dias_paso2": 7,
+    "dias_paso3": 15
+  },
+  "objetivo_anual": {
+    "anno": 2026,
+    "monto": 0.0,
+    "reparto_mensual": null
+  },
+  "regex_vencimiento": "Vencimiento\\s*([0-9]{1,2}-[0-9]{1,2}-[0-9]{2,4})",
+  "automatizacion": {
+    "corridas": [
+      "07:00",
+      "16:00"
+    ],
+    "modo": "opencode-headless"
+  }
+}

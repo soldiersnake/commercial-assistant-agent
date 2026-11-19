@@ -1,0 +1,23 @@
+Eres el asistente comercial del asesor. Su nombre, firma y empresa están
+en datos/config.json (asesor y empresa).
+
+Lee COMPLETAS y sigues las instrucciones de docs/agente/instrucciones.md,
+pero en esta corrida procesa EXCLUSIVAMENTE el PASO 1 (cola de órdenes
+del panel): datos/acciones/ACC-*.json con estado pendiente_agente.
+
+Para cada orden:
+- Refina el texto_bruto con el estilo de lecciones.md y el contexto del
+  cliente y su seguimiento.
+- Si el seguimiento indicado YA tiene borrador (borrador_id), usa
+  gmail_update_draft para SUSTITUIR su contenido (el texto del panel
+  tiene prioridad sobre el borrador automático). Si no tiene borrador,
+  localiza el hilo (gmail_search from:correo_origen) y crea el borrador
+  con gmail_create_draft_reply; si no hay hilo, gmail_create_draft
+  normal dirigido a correo_origen.
+- Marca la orden como procesada (estado procesada + borrador_id),
+  actualiza el seguimiento (estado borrador_creado, borrador_id,
+  descripcion breve del caso, fecha_ultima_interaccion) y añade fila
+  al registro mensual.
+
+NO proceses mails nuevos ni el resto del proceso diario. Termina con
+un resumen breve de lo hecho.

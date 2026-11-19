@@ -1,0 +1,17 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "opencode-go/glm-5.3-flash",
+  "mcp": {
+    "servers": {
+      "gmail": {
+        "type": "local",
+        "command": [".venv\\Scripts\\python.exe", "mcp-gmail\\servidor_mcp.py"],
+        "cwd": "."
+      },
+      "playwright": {
+        "type": "local",
+        "command": ["cmd", "/c", "npx", "-y", "@playwright/mcp@latest"]
+      }
+    }
+  }
+}

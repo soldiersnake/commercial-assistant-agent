@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel de Gestión</title>
+<style>
+  :root{
+    --azul:#1f4e78; --azul2:#2e6da4; --fondo:#f4f6f8; --borde:#d9dee3;
+    --verde:#2e7d32; --naranja:#e65100; --amarillo:#f9a825; --rojo:#c62828;
+    --morado:#6a4c93; --gris:#90a4ae;
+  }
+  *{box-sizing:border-box; margin:0}
+  body{font-family:"Segoe UI",system-ui,sans-serif; background:var(--fondo); color:#22313f; font-size:14px}
+  header{background:var(--azul); color:#fff; padding:14px 22px}
+  header h1{font-size:19px; font-weight:600}
+  header .sub{opacity:.85; font-size:12px}
+  .metricas{display:flex; flex-wrap:wrap; gap:10px; padding:14px 22px}
+  .chip{background:#fff; border:1px solid var(--borde); border-radius:8px;
+        padding:8px 14px; min-width:120px}
+  .chip .n{font-size:21px; font-weight:700}
+  .chip .t{font-size:11px; color:#607080; text-transform:uppercase; letter-spacing:.4px}
+  .chip.alerta .n{color:var(--rojo)}
+  .chip.ok .n{color:var(--verde)}
+  nav{display:flex; gap:4px; padding:0 22px; border-bottom:2px solid var(--azul); background:#fff}
+  nav button{border:none; background:none; padding:10px 16px; font-size:14px; cursor:pointer;
+             border-bottom:3px solid transparent; color:#45596b}
+  nav button.activo{border-bottom-color:var(--azul); font-weight:600; color:var(--azul)}
+  nav button .burbuja{background:var(--rojo); color:#fff; border-radius:9px; padding:1px 7px; font-size:11px}
+  .contenedor{padding:16px 22px 60px}
+  .barra{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px; align-items:center}
+  .barra input[type=text], .barra select{padding:7px 10px; border:1px solid var(--borde); border-radius:6px; font-size:13px}
+  .barra input[type=text]{min-width:230px}
+  table{width:100%; border-collapse:collapse; background:#fff; border-radius:8px; overflow:hidden;
+        box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  th{background:var(--azul); color:#fff; text-align:left; padding:8px 10px; font-size:12px;
+     text-transform:uppercase; letter-spacing:.3px; white-space:nowrap}
+  td{padding:7px 10px; border-top:1px solid var(--borde); vertical-align:top}
+  tr:hover td{background:#eef4fa}
+  .badge{display:inline-block; border-radius:10px; padding:2px 9px; font-size:11px; font-weight:600; white-space:nowrap}
+  .b-pend{background:#fff3cd; color:#7a5c00}
+  .b-borrador{background:#fff8e1; color:#8a6d00; border:1px dashed #d4b106}
+  .b-respondido{background:#e3f2e1; color:#2e5b2e}
+  .b-descartado{background:#eceff1; color:#455a64; border:1px dashed #90a4ae}
+  .b-captacion{background:#fff3e0; color:#e65100; font-weight:600}
+  .b-alta{background:#ffe0d1; color:#a03d00}
+  .b-media{background:#e3f0fd; color:#1d5480}
+  .b-baja{background:#eceff1; color:#546e7a}
+  .b-empresa{background:#ede7f6; color:var(--morado)}
+  .b-propio{background:#e8f5e9; color:var(--verde)}
+  .b-ajeno{background:#efebe9; color:#6d4c41}
+  .b-prospecto{background:#e1f5fe; color:#01579b}
+  .b-rojo{background:#fdecea; color:var(--rojo)}
+  .b-firmado{background:#e8f5e9; color:var(--verde)}
+  .b-vencido{background:#fdecea; color:var(--rojo)}
+  button.acc{border:1px solid var(--borde); background:#fff; border-radius:6px; padding:4px 10px;
+             cursor:pointer; font-size:12px}
+  button.acc:hover{background:var(--azul2); color:#fff; border-color:var(--azul2)}
+  button.acc.primary{background:var(--azul); color:#fff; border-color:var(--azul); font-weight:600}
+  td.c-acciones{white-space:normal; width:240px; min-width:210px; vertical-align:top}
+  td.c-acciones button.acc{display:inline-block; margin:0 3px 5px 0; padding:4px 8px; white-space:nowrap}
+  button.acc.danger{background:var(--rojo); color:#fff; border-color:var(--rojo)}
+  button.acc.danger:hover{background:#b71c1c; border-color:#b71c1c; color:#fff}
+  .oculto{display:none !important}
+  /* modal */
+  .fondo-modal{position:fixed; inset:0; background:rgba(20,40,60,.45); display:flex;
+               align-items:flex-start; justify-content:center; padding:40px 16px; z-index:50}
+  .modal{background:#fff; border-radius:10px; max-width:640px; width:100%; padding:20px 24px;
+         max-height:85vh; overflow:auto; box-shadow:0 12px 40px rgba(0,0,0,.25)}
+  .modal .cabecera-fija{position:sticky; top:-20px; margin:-20px -24px 0; padding:6px 12px;
+                        display:flex; justify-content:flex-end; background:#fff; z-index:5;
+                        border-bottom:1px solid var(--borde)}
+  .modal .cabecera-fija button{border:none; background:none; cursor:pointer; font-size:14px;
+                               color:#607080; padding:4px 8px; border-radius:6px}
+  .modal .cabecera-fija button:hover{background:var(--fondo); color:var(--rojo)}
+  .modal h2{font-size:16px; margin-bottom:12px; color:var(--azul)}
+  .modal label{display:block; font-size:12px; color:#607080; margin:10px 0 4px; font-weight:600}
+  .modal input[type=text], .modal input[type=date], .modal input[type=time], .modal textarea,
+  .modal select{width:100%; padding:8px 10px; border:1px solid var(--borde); border-radius:6px; font-size:13px; font-family:inherit}
+  .modal textarea{min-height:110px; resize:vertical}
+  .modal .pie{display:flex; justify-content:flex-end; gap:8px; margin-top:16px}
+  .ficha-contacto{display:flex; align-items:center; gap:8px; padding:5px 0; border-bottom:1px dashed var(--borde)}
+  .ficha-contacto .tipo{font-size:11px; color:#607080; width:64px}
+  .tarjeta{background:#fff; border:1px solid var(--borde); border-radius:8px; padding:14px 16px; margin-bottom:10px}
+  .tarjeta h3{font-size:14px; color:var(--azul); margin-bottom:6px}
+  .tarjeta .fila{display:flex; gap:8px; align-items:center; margin-top:8px; flex-wrap:wrap}
+  #toast{position:fixed; bottom:18px; left:50%; transform:translateX(-50%); background:#22313f;
+         color:#fff; padding:10px 20px; border-radius:8px; font-size:13px; z-index:99;
+         box-shadow:0 4px 14px rgba(0,0,0,.3)}
+  .nota{font-size:12px; color:#607080}
+  /* módulo económico */
+  .tarjeta h3{display:flex; align-items:center; gap:8px}
+  .progreso{background:#e3e8ee; border-radius:9px; height:22px; overflow:hidden; margin:8px 0}
+  .progreso>div{height:100%; background:var(--verde); border-radius:9px}
+  .progreso.sobre>div{background:var(--azul)}
+  .progreso.atras>div{background:var(--rojo)}
+  .embudo-chips{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0}
+  .embudo-chip{border:1px solid var(--borde); border-radius:8px; padding:6px 12px; text-align:center}
+  .embudo-chip .n{font-size:17px; font-weight:700}
+  .embudo-chip .e{font-size:12px; color:#45596b}
+  .embudo-chip .t{font-size:10px; color:#78909c; text-transform:uppercase}
+  .flecha{align-self:center; color:#90a4ae; font-size:16px}
+  .ranking tr.top td{background:#e8f5e9}
+  .barras-mes{display:flex; gap:3px; align-items:flex-end; height:64px; margin:10px 0 2px}
+  .barras-mes>div{flex:1; background:var(--azul2); border-radius:3px 3px 0 0; min-height:2px}
+  .barras-mes>div.hoy{background:var(--verde)}
+  .barras-mes>div.cero{background:#d6dde3}
+  .ejes-mes{display:flex; gap:3px}
+  .ejes-mes>span{flex:1; font-size:9px; color:#90a4ae; text-align:center}
+  .venta-origen{font-size:10px; border-radius:8px; padding:1px 7px; margin-left:6px}
+  .v-auto{background:#e3f0fd; color:#1d5480}
+  .v-manual{background:#e8f5e9; color:var(--verde)}
+  .vacío{text-align:center; padding:30px; color:#78909c}
+</style>
+</head>
+<body>
+<header style="position:relative">
+  <h1>Panel de Gestión</h1>
+  <div class="sub" id="pie-cabecera"></div>
+  <div style="position:absolute; top:12px; right:22px; display:flex; gap:8px">
+    <button class="acc" id="btn-procesar" onclick="botonProcesar()" title="Lanza el proceso diario completo: mails, borradores, citas y datos">⚡ Procesar ahora</button>
+    <button class="acc" id="btn-importar" onclick="botonImportar()" title="Importa el Excel de clientes depositado en la carpeta entrada/">📥 Importar clientes</button>
+  </div>
+</header>
+
+<div class="metricas" id="metricas"></div>
+
+<nav id="pestañas">
+  <button data-tab="seguimientos" class="activo">Seguimientos <span id="burbuja-seg"></span></button>
+  <button data-tab="clientes">Clientes</button>
+  <button data-tab="presupuestos">Presupuestos</button>
+  <button data-tab="programaciones">Programaciones <span id="burbuja-prog"></span></button>
+  <button data-tab="citas">📅 Citas</button>
+  <button data-tab="vinculaciones">Vinculaciones <span id="burbuja-vin"></span></button>
+</nav>
+
+<div class="contenedor" id="contenido"></div>
+<div id="modal-raiz"></div>
+<div id="toast" class="oculto"></div>
+
+<script>
+"use strict";
+/* ── Estado global ── */
+let EST = null;          // instantánea del servidor
+let TAB = "seguimientos";
+let huellaEst = null;    // huella de los datos para detectar cambios
+let pendienteRefresco = false;
+
+const CATEGORIA_TXT = {
+  tecnico: "🔧 Técnico", facturacion: "💳 Facturación",
+  trabajos_pendientes: "📋 Trabajos pend.", comercial: "💼 Comercial",
+  empresa: "🏢 Empresa",
+};
+const ESTADO_PRES = {
+  enviado: "📤 Enviado", pendiente_firma: "⏳ Pendiente firma",
+  firmado: "✅ Firmado", rechazado: "❌ Rechazado", anulado: "🚫 Anulado",
+};
+
+function esc(t){
+  return String(t ?? "").replace(/[&<>"']/g, c =>
+    ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function fFecha(iso){
+  if(!iso) return "";
+  const d = new Date(iso);
+  if(isNaN(d)) return iso;
+  return d.toLocaleDateString("es-ES", {day:"2-digit", month:"2-digit", year:"numeric"});
+}
+function fEuro(n){ return n ? n.toLocaleString("es-ES", {maximumFractionDigits:0}) + " €" : ""; }
+
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.remove("oculto");
+  clearTimeout(t._id); t._id = setTimeout(() => t.classList.add("oculto"), 4000);
+}
+
+async function cargar(){
+  const r = await fetch("/api/estado");
+  EST = await r.json();
+  huellaEst = huellaDe(EST);
+  render();
+}
+
+/* ── Auto-refresco cada 30 s sin recargar la página ── */
+function huellaDe(est){
+  return JSON.stringify([
+    est.metricas,
+    est.seguimientos.map(s => [s.id, s.estado, s.descripcion,
+                               s.captacion, s.paso_pendiente?.n, s.paso_pendiente?.estado,
+                               s.paso_pendiente?.fecha_programada,
+                               s.fecha_ultima_interaccion || s.fecha_ultimo_movimiento]),
+    est.presupuestos.map(p => [p.id, p.estado, p.proxima_reclamacion]),
+    est.programaciones.map(p => [p.id, p.estado, p.fecha_programada]),
+    est.clientes.length, est.sin_vincular.length, est.duplicados.length,
+    est.ventas.map(v => [v.id, v.importe, v.fecha, v.descripcion, v.cliente_id]),
+    est.citas.map(c => [c.id, c.estado, c.fecha, c.hora,
+                        c.modificaciones.length,
+                        c.resultado ? c.resultado.dio_resultado : null]),
+    est.seguimientos.map(s => [s.id, s.fecha_ultimo_envio]),
+  ]);
+}
+function hayModal(){ return !!document.querySelector(".fondo-modal"); }
+function escribiendo(){
+  const a = document.activeElement;
+  return !!a && ["INPUT", "TEXTAREA", "SELECT"].includes(a.tagName);
+}
+setInterval(async () => {
+  try {
+    const r = await fetch("/api/estado");
+    if (!r.ok) return;
+    const nuevo = await r.json();
+    const h = huellaDe(nuevo);
+    const seguro = !hayModal() && !escribiendo();
+    if (h !== huellaEst) {
+      if (seguro) {
+        EST = nuevo; huellaEst = h; render();
+        toast("🔄 Datos actualizados");
+      } else {
+        pendienteRefresco = true;   // espera a que termines de escribir / cerrar el modal
+      }
+    } else if (pendienteRefresco && seguro) {
+      EST = nuevo; huellaEst = h; render(); pendienteRefresco = false;
+      toast("🔄 Datos actualizados");
+    }
+  } catch (e) { /* servidor no disponible: siguiente intento */ }
+}, 30000);
+
+async function accion(tipo, payload){
+  const r = await fetch("/api/accion", {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({tipo, ...payload}),
+  });
+  const resp = await r.json();
+  toast(resp.mensaje ?? "");
+  if(resp.estado) { EST = resp.estado; render(); }
+}
+
+/* ── Render principal ── */
+function render(){
+  document.getElementById("pie-cabecera").textContent =
+    `Datos al ${new Date(EST.generado).toLocaleString("es-ES")} · usuario: ${EST.config.asesor?.nombre ?? ""}`;
+  renderMetricas();
+  renderBurbujas();
+  const c = document.getElementById("contenido");
+  c.innerHTML = ({seguimientos: vistaSeguimientos, clientes: vistaClientes,
+                  presupuestos: vistaPresupuestos, programaciones: vistaProgramaciones,
+                  citas: vistaCitas, vinculaciones: vistaVinculaciones})[TAB]();
+}
+
+function renderMetricas(){
+  const m = EST.metricas;
+  const chips = [
+    ["Pendientes respuesta", m.pendientes_respuesta, m.pendientes_respuesta ? "alerta" : "ok"],
+    ["En borrador", m.en_borrador, m.en_borrador ? "alerta" : ""],
+    ["Urgentes", m.urgentes, m.urgentes ? "alerta" : ""],
+    ["> 7 días sin resp.", m.sin_responder_7, m.sin_responder_7 ? "alerta" : ""],
+    ["Pend. de firma", m.presup_pendiente_firma, ""],
+    ["€ pendiente firma", fEuro(m.presup_importe_pendiente), ""],
+    ["€ firmado en el año", fEuro(m.presup_importe_firmado_anno), "ok"],
+    ["Programaciones", m.programaciones_pend, ""],
+    ["Vencidas sin enviar", m.programaciones_vencidas, m.programaciones_vencidas ? "alerta" : ""],
+    ["Citas programadas", m.citas_programadas, ""],
+    ["Citas efectuadas", m.citas_efectuadas, "ok"],
+    ["Sin vincular", m.sin_vincular, m.sin_vincular ? "alerta" : ""],
+    ["🎯 Captaciones", m.captaciones_activas, m.captacion_pasos_vencidos ? "alerta" : ""],
+    ["Pasos captación vencidos", m.captacion_pasos_vencidos, m.captacion_pasos_vencidos ? "alerta" : ""],
+    ["Clientes propios", m.propios, ""],
+    ["Ajenos", m.ajenos, ""],
+    ["Prospectos", m.prospectos, ""],
+  ];
+  document.getElementById("metricas").innerHTML =
+    chips.map(([t, n, cls]) => `<div class="chip ${cls}"><div class="n">${esc(n)}</div><div class="t">${esc(t)}</div></div>`).join("");
+}
+
+function renderBurbujas(){
+  const m = EST.metricas;
+  document.getElementById("burbuja-seg").innerHTML =
+    m.pendientes_respuesta ? `<span class="burbuja">${m.pendientes_respuesta}</span>` : "";
+  document.getElementById("burbuja-prog").innerHTML =
+    m.programaciones_vencidas ? `<span class="burbuja">${m.programaciones_vencidas}</span>` : "";
+  document.getElementById("burbuja-vin").innerHTML =
+    (m.sin_vincular || EST.duplicados.length)
+      ? `<span class="burbuja">${m.sin_vincular + EST.duplicados.length}</span>` : "";
+}
+
+document.getElementById("pestañas").addEventListener("click", e => {
+  const btn = e.target.closest("button[data-tab]");
+  if(!btn) return;
+  TAB = btn.dataset.tab;
+  document.querySelectorAll("#pestañas button").forEach(b =>
+    b.classList.toggle("activo", b === btn));
+  render();
+});
+
+/* ── Seguimientos ── */
+let filtroSeg = {texto: "", categoria: "", prioridad: "", estado: ""};
+
+function vistaSeguimientos(){
+  const segs = EST.seguimientos.filter(s =>
+    (!filtroSeg.texto || (s.descripcion + " " + (s.cliente_nombre || "") + " " + (s.cliente_id || "")).toLowerCase().includes(filtroSeg.texto.toLowerCase())) &&
+    (!filtroSeg.categoria || s.categoria === filtroSeg.categoria) &&
+    (!filtroSeg.prioridad || s.prioridad === filtroSeg.prioridad) &&
+    (!filtroSeg.estado || s.estado === filtroSeg.estado));
+  return `
+  <div class="barra">
+    <input type="text" id="f-seg-texto" placeholder="Buscar cliente o caso…" value="${esc(filtroSeg.texto)}">
+    <select id="f-seg-cat"><option value="">Todas las categorías</option>${Object.entries(CATEGORIA_TXT).map(([k,v]) => `<option value="${k}" ${filtroSeg.categoria===k?"selected":""}>${v}</option>`).join("")}</select>
+    <select id="f-seg-estado"><option value="">Todos los estados</option>
+      <option value="pendiente_respuesta" ${filtroSeg.estado==="pendiente_respuesta"?"selected":""}>⏳ Pendientes</option>
+      <option value="borrador_creado" ${filtroSeg.estado==="borrador_creado"?"selected":""}>🟡 En borrador</option>
+      <option value="respondido" ${filtroSeg.estado==="respondido"?"selected":""}>✅ Respondidos</option>
+      <option value="descartado" ${filtroSeg.estado==="descartado"?"selected":""}>🚫 Descartados</option>
+      <option value="cerrado" ${filtroSeg.estado==="cerrado"?"selected":""}>Cerrados</option></select>
+    <select id="f-seg-prio"><option value="">Toda prioridad</option>
+      <option value="alta" ${filtroSeg.prioridad==="alta"?"selected":""}>🔴 Alta</option>
+      <option value="media" ${filtroSeg.prioridad==="media"?"selected":""}>🟠 Media</option>
+      <option value="baja" ${filtroSeg.prioridad==="baja"?"selected":""}>⚪ Baja</option></select>
+  </div>
+  <table><thead><tr><th>Cliente</th><th>Caso</th><th>Categoría</th><th>Prioridad</th>
+    <th>Estado</th><th>Últ. interac.</th><th>Últ. envío</th><th>Días</th><th></th></tr></thead><tbody>
+  ${segs.length ? segs.map(segFila).join("") : `<tr><td colspan="9" class="vacío">Sin seguimientos que cumplan el filtro</td></tr>`}
+  </tbody></table>`;
+}
+
+function segFila(s){
+  const empresa = s.categoria === "empresa";
+  const pend = s.estado === "pendiente_respuesta";
+  const badgeCli = empresa ? ""
+    : `<span class="badge ${s.cliente_propiedad === "propio" ? "b-propio" : "b-ajeno"}">${s.cliente_propiedad === "propio" ? "Propio" : "Ajeno"}</span> `;
+  const dias = s.dias_sin_respuesta;
+  return `<tr ${empresa ? 'style="background:#faf7fc"' : ""}>
+    <td>${badgeCli}<b>${esc(s.cliente_nombre || "")}</b><br><span class="nota">${esc(s.cliente_id || "")}</span>${s.correo_origen ? `<br><span class="nota" style="color:var(--azul)">✉️ ${esc(s.correo_origen)}</span>` : ""}</td>
+    <td>${s.nuevo ? '<span class="badge b-media">🆕 Nuevo</span> ' : (s.continua_de ? `<span class="nota">continúa ${esc(s.continua_de)}</span> ` : "")}
+        <b>${esc(s.descripcion || s.asunto || "(sin descripción)")}</b>${s.captacion ? ' <span class="badge b-captacion">🎯 Captación</span>' : ""}${s.proximo_paso ? `<br><span class="nota">➜ ${esc(s.proximo_paso)}</span>` : ""}${s.paso_pendiente ? `<br><span class="nota" style="color:${s.paso_pendiente.vencido ? "var(--rojo)" : "inherit"}; font-weight:${s.paso_pendiente.vencido ? "600" : "normal"}">🎯 Paso ${s.paso_pendiente.n}/3 — ${esc(s.paso_pendiente.concepto)} (${fFecha(s.paso_pendiente.fecha_programada)})${s.paso_pendiente.vencido ? " ⚠️ vencido" : ""}</span>` : ""}${s.motivo_descarte ? `<br><span class="nota" style="color:#455a64">🚫 Motivo del descarte: ${esc(s.motivo_descarte)}</span>` : ""}${s.edificio ? `<br><span class="nota">Edificio: ${esc(s.edificio)}</span>` : ""}
+        <div style="display:flex; align-items:center; gap:70px; margin-top:8px">${s.thread_id ? `<button class="acc" onclick="modalHilo('${esc(s.thread_id)}','${esc(s.cliente_nombre || s.id)}')" title="Ver la conversación completa">👁️ Hilo</button>` : ""}<button class="acc primary" onclick="modalResponder('${esc(s.id)}')" title="Redacta la respuesta; el agente la pulirá y dejará el borrador en Gmail">✍️ Responder</button></div></td>
+    <td>${CATEGORIA_TXT[s.categoria] || esc(s.categoria)}</td>
+    <td><span class="badge b-${esc(s.prioridad || "baja")}">${(s.prioridad || "baja").toUpperCase()}</span></td>
+    <td>${s.estado === "descartado" ? '<span class="badge b-descartado">🚫 Descartado</span>' : `<span class="badge ${pend ? (s.estado === "borrador_creado" ? "b-borrador" : "b-pend") : "b-respondido"}">${s.estado === "borrador_creado" ? "🟡 En borrador" : pend ? "⏳ Pendiente" : "✅ Respondido"}</span>`}</td>
+    <td>${fFecha(s.fecha_ultima_interaccion || s.fecha_ultimo_movimiento)}</td>
+    <td>${s.fecha_ultimo_envio ? `<b>${fFecha(s.fecha_ultimo_envio)}</b>` : '<span class="nota">—</span>'}</td>
+    <td>${dias != null ? `<b style="color:${dias >= 7 ? "var(--rojo)" : dias >= 4 ? "var(--amarillo)" : "inherit"}">${dias}</b>` : ""}</td>
+    <td class="c-acciones">${s.estado === "borrador_creado" ? `<button class="acc" onclick="accion('estado_seguimiento',{id:'${esc(s.id)}',estado:'respondido'})" title="Marca el caso como respondido cuando hayas enviado el borrador a mano">✅ Envié</button>` : ""}${s.paso_pendiente && s.paso_pendiente.estado === "borrador_creado" ? `<button class="acc" onclick="accion('captacion_paso',{id:'${esc(s.id)}',n:${s.paso_pendiente.n},estado:'enviado'})" title="Marca este paso del plan de captación como enviado a mano">✅ Paso ${s.paso_pendiente.n}</button>` : ""}${s.paso_pendiente ? `<button class="acc" onclick="modalReprogramarPaso('${esc(s.id)}',${s.paso_pendiente.n},'${esc(s.paso_pendiente.fecha_programada || "")}')" title="Adelanta o atrasa la fecha de este paso">📅 Paso</button>` : ""}<button class="acc" onclick="modalAgendarCita('${esc(s.id)}')" title="Crea la cita en su Calendar y deja el borrador de aviso al cliente">📅 Cita</button>${s.estado !== "cerrado" && s.estado !== "descartado" ? `<button class="acc danger" onclick="modalDescartar('${esc(s.id)}')" title="Cierra el caso sin responder (hilo ya resuelto, informativo…). Se archiva con una nota, no se borra">🚫 Descartar</button>` : ""}${s.estado !== "cerrado" && s.estado !== "descartado" && s.categoria === "comercial" ? `<button class="acc" onclick="accion('captacion_toggle',{id:'${esc(s.id)}',captacion:${s.captacion ? "false" : "true"}})" title="${s.captacion ? "No es captación: es gestión de un cliente ya existente" : "Es una primera contactación comercial (prospecto nuevo o edificio ajeno): activa el plan de 3 propuestas"}">${s.captacion ? "👤 Cliente" : "🎯 Captación"}</button>` : ""}${s.estado !== "cerrado" && s.estado !== "descartado" && s.categoria !== "empresa" ? `<button class="acc" onclick="modalRecategorizar('${esc(s.id)}','${esc(s.categoria || "")}')" title="Corrige la categoría si la clasificación automática falló. Para marcarla CAPTACIÓN primero pásala a 💼 Comercial">⇄ Categoría</button>` : ""}</td>
+  </tr>`;
+}
+
+/* ── Modal responder ── */
+function modalResponder(idSeg){
+  const s = EST.seguimientos.find(x => x.id === idSeg);
+  const cli = EST.clientes.find(c => c.id === s.cliente_id);
+  const correos = (cli?.fichas_contacto || []).filter(f => f.tipo === "email");
+  const origen = s.correo_origen && correos.some(f => f.valor === s.correo_origen)
+    ? s.correo_origen : (correos[0]?.valor || "");
+  abrirModal(`
+    <h2>✍️ Responder — ${esc(cli?.nombre ?? s.cliente_id ?? "interno")}</h2>
+    ${s ? `<div class="nota">Caso: ${esc(s.descripcion || "")} (${esc(s.id)})</div>` : ""}
+    <label>Responder a (hilo de origen)</label>
+    <select id="m-correo">${correos.map(f => `<option value="${esc(f.valor)}" ${f.valor===origen?"selected":""}>${esc(f.valor)}</option>`).join("") || `<option value="">(sin email en ficha)</option>`}</select>
+    <label>Su respuesta (tal como quiera escribirla; el agente la pulirá)</label>
+    <textarea id="m-texto" placeholder="Ej: rivera, le digo q el martes pasamos a ver el motor del 2ºB"></textarea>
+    <label><input type="checkbox" id="m-prog-check" style="width:auto"> Programar el envío para otra fecha</label>
+    <div id="m-prog-campos" class="oculto" style="display:flex; gap:10px">
+      <div style="flex:1"><label>Fecha</label><input type="date" id="m-prog-fecha" value="${EST.hoy}"></div>
+      <div><label>Hora</label><input type="time" id="m-prog-hora" value="09:00"></div>
+    </div>
+    <div class="pie">
+      <button class="acc" onclick="cerrarModal()">Cancelar</button>
+      <button class="acc primary" onclick="enviarResponder('${esc(idSeg)}')">Generar borrador</button>
+    </div>
+    <p class="nota" style="margin-top:10px">El agente creará un <b>borrador en Gmail</b> con su texto corregido y con contexto del caso. Usted lo revisa y lo envía. El sistema nunca envía por su cuenta.</p>`);
+  document.getElementById("m-prog-check").addEventListener("change", e =>
+    document.getElementById("m-prog-campos").classList.toggle("oculto", !e.target.checked));
+  document.getElementById("m-texto").focus();
+}
+
+function enviarResponder(idSeg){
+  const texto = document.getElementById("m-texto").value.trim();
+  if(!texto){ toast("Escriba la respuesta primero"); return; }
+  const s = EST.seguimientos.find(x => x.id === idSeg);
+  const progCheck = document.getElementById("m-prog-check").checked;
+  const payload = {
+    seguimiento_id: idSeg,
+    cliente_id: s?.cliente_id ?? null,
+    correo_origen: document.getElementById("m-correo").value,
+    texto,
+    programar: progCheck ? {fecha: document.getElementById("m-prog-fecha").value,
+                            hora: document.getElementById("m-prog-hora").value || "09:00"} : null,
+  };
+  cerrarModal(); accion("responder", payload);
+}
+
+/* ── Modal descartar ── */
+function modalDescartar(idSeg){
+  const s = EST.seguimientos.find(x => x.id === idSeg);
+  abrirModal(`
+    <h2>🚫 Descartar — ${esc(EST.clientes.find(c => c.id === s?.cliente_id)?.nombre ?? s?.cliente_id ?? "interno")}</h2>
+    <div class="nota">Caso: ${esc(s?.descripcion || "")} (${esc(idSeg)})</div>
+    <label>Motivo del descarte (quedará archivado en el historial)</label>
+    <input type="text" id="m-d-nota" placeholder="Ej: hilo ya resuelto, no requiere respuesta">
+    <div class="pie">
+      <button class="acc" onclick="cerrarModal()">Cancelar</button>
+      <button class="acc primary" onclick="guardarDescarte('${esc(idSeg)}')">Descartar caso</button>
+    </div>
+    <p class="nota" style="margin-top:10px">El caso no desaparece: queda archivado como <b>🚫 Descartado</b> con su motivo, y deja de contar como pendiente. Si el cliente vuelve a escribir de este tema, se abrirá un caso nuevo.</p>`);
+  document.getElementById("m-d-nota").focus();
+}
+
+function guardarDescarte(idSeg){
+  const nota = document.getElementById("m-d-nota").value.trim();
+  if(!nota){ toast("Escriba el motivo del descarte"); return; }
+  accion("descartar_seguimiento", {id: idSeg, nota});
+  cerrarModal();
+}
+
+/* ── Modal recategorizar ── */
+function modalRecategorizar(idSeg, categoriaActual){
+  const opciones = Object.entries(CATEGORIA_TXT).filter(([k]) => k !== "empresa");
+  abrirModal(`
+    <h2>⇄ Recategorizar caso</h2>
+    <div class="nota">Cambia la categoría si la clasificación automática falló.</div>
+    <label>Nueva categoría</label>
+    <select id="m-recat">${opciones.map(([k, v]) =>
+      `<option value="${k}" ${k === categoriaActual ? "selected" : ""}>${v}</option>`).join("")}</select>
+    <p class="nota" style="margin-top:10px">Si la pasas a 💼 <b>Comercial</b> NO se activa la captación por sí sola: use el botón 🎯 para marcarla, y solo si es una contactación comercial.</p>
+    <div class="pie">
+      <button class="acc" onclick="cerrarModal()">Cancelar</button>
+      <button class="acc primary" onclick="guardarRecategoria('${esc(idSeg)}')">Recategorizar</button>
+    </div>`);
+}
+
+function guardarRecategoria(idSeg){
+  const categoria = document.getElementById("m-recat").value;
+  accion("recategorizar_seguimiento", {id: idSeg, categoria});
+  cerrarModal();
+}
+
+/* ── Modal reprogramar paso de captación ── */
+function modalReprogramarPaso(idSeg, n, fechaActual){
+  abrirModal(`
+    <h2>📅 Reprogramar paso ${n} del plan de captación</h2>
+    <label>Nueva fecha</label>
+    <input type="date" id="m-paso-fecha" value="${esc(fechaActual || EST.hoy)}">
+    <div class="pie">
+      <button class="acc" onclick="cerrarModal()">Cancelar</button>
+      <button class="acc primary" onclick="guardarPaso('${esc(idSeg)}', ${n})">Guardar fecha</button>
+    </div>`);
+}
+
+function guardarPaso(idSeg, n){
+  const fechaV = document.getElementById("m-paso-fecha").value;
+  if(!fechaV){ toast("Indique la nueva fecha"); return; }
+  accion("captacion_reprogramar", {id: idSeg, n, fecha: fechaV});
+  cerrarModal();
+}
+
+/* ── Clientes ── */
+let filtroCli = {texto: "", propiedad: "", tipo: ""};
+
+function vistaClientes(){
+  const clis = EST.clientes.filter(c =>
+    (!filtroCli.texto || (c.nombre + " " + c.direccion + " " + c.poblacion + " " + (c.codigo_empresa||"")).toLowerCase().includes(filtroCli.texto.toLowerCase())) &&
+    (!filtroCli.propiedad || c.propiedad === filtroCli.propiedad) &&
+    (!filtroCli.tipo || c.tipo === filtroCli.tipo))
+    .slice(0, 200);
+  return `
+  <div class="barra">
+    <input type="text" id="f-cli-texto" placeholder="Buscar por nombre, dirección, población, código…" value="${esc(filtroCli.texto)}">
+    <select id="f-cli-prop"><option value="">Propios y ajenos</option>
+      <option value="propio" ${filtroCli.propiedad==="propio"?"selected":""}>🟢 Propios</option>
+      <option value="ajeno" ${filtroCli.propiedad==="ajeno"?"selected":""}>⚪ Ajenos</option></select>
+    <select id="f-cli-tipo"><option value="">Clientes y prospectos</option>
+      <option value="cliente" ${filtroCli.tipo==="cliente"?"selected":""}>Clientes</option>
+      <option value="prospecto" ${filtroCli.tipo==="prospecto"?"selected":""}>Prospectos</option></select>
+    <span class="nota">${EST.clientes.length} clientes en cartera (mostrando máx. 200)</span>
+  </div>
+  <table><thead><tr><th>Cód.</th><th>Nombre</th><th>Población</th><th>Contactos</th>
+    <th>Tipo</th><th>Propiedad</th><th></th></tr></thead><tbody>
+  ${clis.map(cliFila).join("")}
+  </tbody></table>`;
+}
+
+function cliFila(c){
+  const emails = c.fichas_contacto.filter(f => f.tipo === "email");
+  const tels = c.fichas_contacto.filter(f => f.tipo === "telefono");
+  return `<tr>
+    <td>${esc(c.codigo_empresa)}</td>
+    <td><b>${esc(c.nombre)}</b><br><span class="nota">${esc(c.direccion || "")}</span></td>
+    <td>${esc(c.poblacion || "")}</td>
+    <td>${emails.length ? "✉️ " + emails.length : '<span class="nota">sin email</span>'} · ${tels.length ? "📞 " + tels.length : '<span class="nota">sin tel.</span>'}</td>
+    <td><span class="badge ${c.tipo === "prospecto" ? "b-prospecto" : "b-media"}">${c.tipo === "prospecto" ? "Prospecto" : "Cliente"}</span></td>
+    <td><span class="badge ${c.propiedad === "propio" ? "b-propio" : "b-ajeno"}">${c.propiedad === "propio" ? "🟢 Propio" : "⚪ Ajeno"}</span></td>
+    <td><button class="acc" onclick="modalFicha('${esc(c.id)}')">Ficha</button></td>
+  </tr>`;
+}
+
+function modalFicha(idCli){
+  const c = EST.clientes.find(x => x.id === idCli);
+  const segs = EST.seguimientos.filter(s => s.cliente_id === idCli && s.estado !== "cerrado");
+  const pres = EST.presupuestos.filter(p => p.cliente_id === idCli && p.estado !== "anulado");
+  abrirModal(`
+    <h2>Ficha — ${esc(c.nombre)}</h2>
+    <div class="nota">${esc(c.codigo_empresa ? "Código empresa: " + c.codigo_empresa + " · " : "")}${esc(c.direccion || "")} · ${esc(c.poblacion || "")}</div>
+    <label>Contactos (email y teléfono — puede haber varios)</label>
+    ${c.fichas_contacto.map(f => `
+      <div class="ficha-contacto">
+        <span class="tipo">${f.tipo === "email" ? "✉️ Email" : "📞 Tel."}</span>
+        <b>${esc(f.valor)}</b>
+        ${f.nombre ? `<span class="nota">${esc(f.nombre)}</span>` : ""}
+        <button class="acc" style="margin-left:auto" onclick="accion('desvincular',{valor:'${esc(f.valor)}',cliente_id:'${esc(c.id)}'});cerrarModal()">Quitar</button>
+      </div>`).join("")}
+    <label>Añadir contacto (email o teléfono)</label>
+    <div style="display:flex; gap:8px">
+      <input type="text" id="m-nuevo-contacto" placeholder="correo@… o 600 000 000">
+      <button class="acc primary" onclick="anadirContacto('${esc(c.id)}')">Añadir</button>
+    </div>
+    <div style="display:flex; gap:16px; margin-top:14px">
+      <div><label>Propiedad</label>
+        <select id="m-prop" onchange="accion('cambiar_propiedad',{cliente_id:'${esc(c.id)}',propiedad:this.value});cerrarModal()">
+          <option value="propio" ${c.propiedad==="propio"?"selected":""}>🟢 Propio</option>
+          <option value="ajeno" ${c.propiedad==="ajeno"?"selected":""}>⚪ Ajeno</option></select></div>
+      <div><label>Tipo</label>
+        <select id="m-tipo" onchange="accion('cambiar_tipo',{cliente_id:'${esc(c.id)}',tipo:this.value});cerrarModal()">
+          <option value="cliente" ${c.tipo==="cliente"?"selected":""}>Cliente</option>
+          <option value="prospecto" ${c.tipo==="prospecto"?"selected":""}>Prospecto</option></select></div>
+    </div>
+    ${segs.length ? `<label>Casos abiertos (${segs.length})</label>${segs.map(s => `<div>• ${CATEGORIA_TXT[s.categoria]||""} — ${esc(s.descripcion||"")} <span class="badge ${s.estado==="pendiente_respuesta"?"b-pend":"b-respondido"}">${s.estado==="pendiente_respuesta"?"pendiente":"respondido"}</span></div>`).join("")}` : ""}
+    ${pres.length ? `<label>Presupuestos (${pres.length})</label>${pres.map(p => `<div>• ${esc(p.referencia||p.id)} — ${ESTADO_PRES[p.estado]||p.estado} — ${fEuro(p.importe)}</div>`).join("")}` : ""}
+    ${c.notas ? `<label>Notas</label><div>${esc(c.notas)}</div>` : ""}
+    <div class="pie"><button class="acc" onclick="cerrarModal()">Cerrar</button></div>`);
+}
+
+function anadirContacto(idCli){
+  const valor = document.getElementById("m-nuevo-contacto").value.trim();
+  if(!valor){ toast("Escriba el email o teléfono"); return; }
+  const tipo = valor.includes("@") ? "email" : "telefono";
+  cerrarModal(); accion("vincular", {valor, tipo, cliente_id: idCli});
+}
+
+/* ── Presupuestos ── */
+function vistaPresupuestos(){
+  const eco = EST.economico;
+  return `
+  ${tarjetaObjetivo(eco)}
+  ${tarjetaEmbudo(eco)}
+  ${tarjetaVentas(eco)}
+  ${tarjetaRanking(eco)}
+  ${tarjetaCaptacion(eco)}
+  ${tablaPresupuestos()}`;
+}
+
+function tarjetaVentas(eco){
+  const ventas = [...EST.ventas].sort((a, b) =>
+    (b.fecha || "").localeCompare(a.fecha || ""));
+  return `<div class="tarjeta"><h3>💰 Ventas facturadas ${eco.anno}
+      <button class="acc primary" style="margin-left:auto" onclick="modalVenta()">➕ Añadir venta</button></h3>
+    ${ventas.length ? `<table><thead><tr><th>Fecha</th><th>Cliente</th><th>Descripción</th><th>Importe</th><th></th></tr></thead><tbody>
+      ${ventas.map(v => `<tr>
+        <td>${fFecha(v.fecha)}</td>
+        <td><b>${esc(nombreVenta(v))}</b></td>
+        <td>${esc(v.descripcion || "")}</td>
+        <td><b>${fEuro(v.importe)}</b> <span class="venta-origen ${v.origen === "automatica" ? "v-auto" : "v-manual"}">${v.origen === "automatica" ? "auto" : "manual"}</span></td>
+        <td>${v.origen === "manual" ? `<button class="acc" onclick="modalVenta('${esc(v.id)}')">Editar</button>
+            <button class="acc" onclick="if(confirm('¿Eliminar la venta ${esc(v.id)}? Queda archivada, no se pierde.'))accion('eliminar_venta',{id:'${esc(v.id)}'})">✕</button>` : ""}</td>
+      </tr>`).join("")}
+      </tbody></table>
+      <p class="nota" style="margin-top:6px">🟢 manual: ventas que el asesor apunta a mano · 🔵 auto: presupuestos firmados que el sistema registra solo.</p>`
+    : `<p class="nota" style="margin-top:8px">Sin ventas manuales. Las automáticas (presupuestos firmados) se ven en el ranking y en el gráfico mensual. Usa «➕ Añadir venta» para apuntar ventas que no pasaron por el sistema (p. ej. de antes de su puesta en marcha).</p>`}
+  </div>`;
+}
+
+function nombreVenta(v){
+  const cli = EST.clientes.find(c => c.id === v.cliente_id);
+  return cli ? cli.nombre : (v.cliente_id || "(sin cliente)");
+}
+
+function modalVenta(idVenta){
+  const v = idVenta ? EST.ventas.find(x => x.id === idVenta) : null;
+  const opciones = EST.clientes
+    .map(c => `<option value="${esc(c.id)}" ${v && v.cliente_id === c.id ? "selected" : ""}>${esc(c.nombre)} (${esc(c.id)})</option>`)
+    .join("");
+  abrirModal(`
+    <h2>${v ? "✏️ Editar venta " + esc(v.id) : "➕ Añadir venta"}</h2>
+    <label>Cliente (asignar venta)</label>
+    <select id="m-v-cli">${opciones}</select>
+    <label>Fecha de la venta</label>
+    <input type="date" id="m-v-fecha" value="${v ? esc(v.fecha) : EST.hoy}">
+    <label>Importe (€)</label>
+    <input type="text" id="m-v-importe" value="${v ? esc(v.importe) : ""}" placeholder="Ej: 2400 o 2.400">
+    <label>Pequeña descripción de la venta</label>
+    <input type="text" id="m-v-desc" value="${v ? esc(v.descripcion || "") : ""}" placeholder="Ej: Mantenimiento 2027 Cdad. Mayor 12">
+    <div class="pie">
+      ${v ? `<button class="acc" style="margin-right:auto; color:var(--rojo)" onclick="if(confirm('¿Eliminar la venta ${esc(v.id)}? Queda archivada, no se pierde.'))accion('eliminar_venta',{id:'${esc(v.id)}'});cerrarModal()">Eliminar</button>` : ""}
+      <button class="acc" onclick="cerrarModal()">Cancelar</button>
+      <button class="acc primary" onclick="guardarVenta('${esc(idVenta || "")}')">${v ? "Guardar cambios" : "Registrar venta"}</button>
+    </div>`);
+}
+
+function guardarVenta(idVenta){
+  const payload = {
+    cliente_id: document.getElementById("m-v-cli").value,
+    fecha: document.getElementById("m-v-fecha").value,
+    importe: document.getElementById("m-v-importe").value,
+    descripcion: document.getElementById("m-v-desc").value,
+  };
+  if (!payload.fecha){ toast("Indica la fecha de la venta"); return; }
+  cerrarModal();
+  if (idVenta) accion("editar_venta", {id: idVenta, ...payload});
+  else accion("crear_venta", payload);
+}
+
+function tarjetaObjetivo(eco){
+  const obj = eco.objetivo_monto;
+  if (!obj){
+    return `<div class="tarjeta"><h3>🎯 Objetivo anual ${eco.anno}</h3>
+      <p class="nota">Aún sin fijar. Con el objetivo, aquí verás el progreso, el gráfico mensual de lo facturado, la proyección a fin de año y el potencial de lo pendiente.</p>
+      <button class="acc primary" onclick="modalObjetivo()">🎯 Fijar objetivo</button></div>`;
+  }
+  const pct = eco.progreso ?? 0;
+  const clase = pct >= 100 ? "sobre" : (eco.mes_pct != null && eco.mes_pct < 80 ? "atras" : "");
+  const proy = eco.proyeccion != null
+    ? `<b>${fEuro(eco.proyeccion)}</b> proyectados a fin de año ` +
+      (eco.proyeccion < obj ? `<span style="color:var(--rojo)">(${fEuro(obj - eco.proyeccion)} por debajo del objetivo)</span>` : `<span style="color:var(--verde)">(objetivo superado)</span>`)
+    : "";
+  const maxMes = Math.max(...eco.por_mes, obj / 12, 1);
+  const barras = eco.por_mes.map((v, i) => {
+    const alto = Math.max(2, Math.round(64 * v / maxMes));
+    const clase = v === 0 ? "cero" : (i === new Date().getMonth() ? "hoy" : "");
+    const tip = `${["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"][i]}: ${fEuro(v)}` +
+      `\nAutomáticas: ${fEuro(eco.por_mes_auto[i])} · Manuales: ${fEuro(eco.por_mes_manual[i])}`;
+    return `<div class="${clase}" style="height:${alto}px" title="${esc(tip)}"></div>`;
+  }).join("");
+  return `<div class="tarjeta"><h3>🎯 Objetivo anual ${eco.anno}: ${fEuro(obj)}</h3>
+    <div class="progreso ${clase}"><div style="width:${Math.min(pct, 100)}%"></div></div>
+    <div>Facturado en el año: <b>${fEuro(eco.total_anno)}</b> (${pct}%) ` +
+      `· Automáticas: ${fEuro(eco.firmado_anno)} · Manuales: ${fEuro(eco.manual_anno)}<br>` +
+      `Este mes: <b>${fEuro(eco.firmado_mes)}</b> ${eco.mes_pct != null ? `(${eco.mes_pct}% del objetivo mensual)` : ""}</div>
+    <div class="barras-mes">${barras}</div>
+    <div class="ejes-mes">${["E","F","M","A","M","J","J","A","S","O","N","D"].map(m => `<span>${m}</span>`).join("")}</div>
+    ${proy ? `<div style="margin-top:6px">📈 ${proy}</div>` : ""}
+    <div style="margin-top:6px">💡 Potencial pendiente de firmar: <b>${fEuro(eco.potencial)}</b>
+        <span class="nota">(de los cuales ${fEuro(eco.captacion.reduce((s, c) => s + (c.importe || 0), 0))} son de captación)</span></div>
+    <div style="margin-top:8px"><button class="acc" onclick="modalObjetivo()">Cambiar objetivo</button></div></div>`;
+}
+
+function tarjetaEmbudo(eco){
+  const e = eco.embudo;
+  const chip = (t, n, e2) => `<div class="embudo-chip"><div class="n">${n}</div><div class="e">${e2}</div><div class="t">${t}</div></div>`;
+  return `<div class="tarjeta"><h3>🚰 Embudo de presupuestos (solo clientes propios)</h3>
+    <div class="embudo-chips">
+      ${chip("Enviados", e.enviado.n, fEuro(e.enviado.euros))}
+      <span class="flecha">→</span>
+      ${chip("Pendientes firma", e.pendiente_firma.n, fEuro(e.pendiente_firma.euros))}
+      <span class="flecha">→</span>
+      ${chip("Firmados", e.firmado.n, fEuro(e.firmado.euros))}
+      <span class="flecha">→</span>
+      ${chip("Rechazados", e.rechazado.n, fEuro(e.rechazado.euros))}
+    </div>
+    <div>Tasa de firma: ${eco.tasa_firma != null ? `<b>${eco.tasa_firma}%</b> (firmados sobre resueltos)` : '<span class="nota">sin datos suficientes</span>'} ·
+        Anulados: ${e.anulado.n}</div></div>`;
+}
+
+function tarjetaRanking(eco){
+  if (!eco.ranking.length)
+    return `<div class="tarjeta"><h3>🏆 Ranking anual de firmas</h3><p class="nota">Sin firmas registradas todavía este año. Se llena solo al marcar presupuestos como Firmados.</p></div>`;
+  return `<div class="tarjeta"><h3>🏆 Ranking anual de ventas (${eco.anno})</h3>
+    <table><thead><tr><th>#</th><th>Cliente</th><th>Firmas</th><th>Importe</th></tr></thead><tbody>
+    ${eco.ranking.map((r, i) => `<tr ${i < 3 ? 'class="top"' : ""}><td><b>${i + 1}</b>${i === 0 ? " 🥇" : i === 1 ? " 🥈" : i === 2 ? " 🥉" : ""}</td>
+      <td>${esc(r.nombre)}</td><td>${r.n_firmas}</td><td><b>${fEuro(r.importe)}</b></td></tr>`).join("")}
+    </tbody></table></div>`;
+}
+
+function tarjetaCaptacion(eco){
+  const cap = eco.captacion;
+  if (!cap.length)
+    return `<div class="tarjeta"><h3>🧲 Captación: dinero en juego</h3><p class="nota">Sin presupuestos sin firmar a prospectos. Cuando se envíen ofertas de captación aparecerán aquí por importe y antigüedad.</p></div>`;
+  return `<div class="tarjeta"><h3>🧲 Captación: dinero en juego (${cap.length})</h3>
+    <table><thead><tr><th>Prospecto</th><th>Oferta</th><th>Importe</th><th>Enviada</th><th>Días sin firma</th><th>Próx. reclamación</th></tr></thead><tbody>
+    ${cap.map(c => `<tr><td><b>${esc(c.nombre)}</b></td><td>${esc(c.titulo || c.presupuesto_id)}</td>
+      <td><b>${fEuro(c.importe)}</b></td><td>${fFecha(c.fecha_envio)}</td>
+      <td><b style="color:${(c.dias_pendiente || 0) >= 15 ? "var(--rojo)" : "inherit"}">${c.dias_pendiente ?? ""}</b></td>
+      <td>${c.proxima_reclamacion ? fFecha(c.proxima_reclamacion) : ""}${c.reclamacion_vencida ? ' <span class="badge b-rojo">¡VENCIDA!</span>' : ""}</td></tr>`).join("")}
+    </tbody></table></div>`;
+}
+
+function tablaPresupuestos(){
+  const pres = EST.presupuestos;
+  if(!pres.length) return `<div class="tarjeta"><h3>Sin presupuestos registrados</h3>
+    <p class="nota">Los presupuestos aparecerán aquí al conectar Gmail (Fase 3) o al registrarlos desde el panel.</p></div>`;
+  return `<table><thead><tr><th>Cliente</th><th>Referencia / Título</th><th>Importe</th>
+    <th>Envío</th><th>Vencimiento</th><th>Próx. reclamación</th><th>Reclam.</th><th>Estado</th><th></th></tr></thead><tbody>
+  ${pres.map(p => `<tr>
+    <td><b>${esc(p.cliente_nombre)}</b><br><span class="nota">${esc(p.cliente_id||"")}</span></td>
+    <td><b>${esc(p.referencia || "")}</b><br><span class="nota">${esc(p.titulo || "")}</span></td>
+    <td><b>${fEuro(p.importe)}</b></td>
+    <td>${fFecha(p.fecha_envio)}</td>
+    <td>${fFecha(p.fecha_vencimiento)}</td>
+    <td>${p.proxima_reclamacion ? `<span class="badge ${p.reclamacion_vencida ? "b-rojo" : "b-media"}">${fFecha(p.proxima_reclamacion)}${p.reclamacion_vencida ? " ¡VENCIDA!" : ""}</span>` : ""}</td>
+    <td>${p.n_reclamaciones || ""}</td>
+    <td><span class="badge ${p.estado==="firmado"?"b-firmado":p.estado==="rechazado"?"b-rojo":p.estado==="anulado"?"b-ajeno":"b-pend"}">${ESTADO_PRES[p.estado]||p.estado}</span></td>
+    <td>
+      ${p.estado !== "firmado" ? `<button class="acc" onclick="accion('marcar_firmado',{presupuesto_id:'${esc(p.id)}'})">✍️ Firmado</button>` : ""}
+      <select style="font-size:11px; padding:3px" onchange="if(this.value)accion('cambiar_estado_presupuesto',{presupuesto_id:'${esc(p.id)}',estado:this.value})">
+        <option value="">Cambiar…</option>
+        <option value="pendiente_firma">Pendiente firma</option>
+        <option value="rechazado">Rechazado</option>
+        <option value="anulado">Anulado</option></select>
+    </td></tr>`).join("")}
+  </tbody></table>`;
+}
+
+/* ── Programaciones ── */
+function vistaProgramaciones(){
+  const progs = EST.programaciones;
+  if(!progs.length) return `<div class="tarjeta"><h3>Sin envíos programados</h3>
+    <p class="nota">Cuando responda un mail con programación de fecha, aparecerá aquí con su aviso de la mañana y su alerta roja si vence sin enviarse.</p></div>`;
+  return `<table><thead><tr><th>Cliente</th><th>Asunto</th><th>Programado</th><th>Estado</th><th>Borrador</th><th></th></tr></thead><tbody>
+  ${progs.map(p => `<tr ${p.estado==="vencido" ? 'style="background:#fdecea"' : ""}>
+    <td><b>${esc(p.cliente_nombre || p.cliente_id || "")}</b></td>
+    <td>${esc(p.asunto || "")}</td>
+    <td>${fFecha(p.fecha_programada)} ${esc(p.hora_programada || "")}</td>
+    <td><span class="badge ${p.estado==="vencido"?"b-vencido":p.estado==="completado"?"b-firmado":"b-pend"}">${p.estado==="vencido"?"🚨 Vencido sin enviar":p.estado==="completado"?"✅ Completado":p.estado==="cancelado"?"Cancelado":"🔵 Programado"}</span></td>
+    <td>${p.borrador_creado ? "Sí" : '<span class="nota">pendiente</span>'}</td>
+    <td>${p.estado !== "completado" && p.estado !== "cancelado" ? `
+      <button class="acc" onclick="modalReprogramar('${esc(p.id)}','${esc(p.fecha_programada||"")}')">Reprogramar</button>
+      <button class="acc" onclick="accion('estado_programacion',{id:'${esc(p.id)}',estado:'completado'})">✅ Enviado</button>
+      <button class="acc" onclick="accion('estado_programacion',{id:'${esc(p.id)}',estado:'cancelado'})">Cancelar</button>` : ""}</td>
+  </tr>`).join("")}
+  </tbody></table>`;
+}
+
+function modalObjetivo(){
+  const eco = EST.economico;
+  abrirModal(`
+    <h2>🎯 Objetivo anual ${eco.anno}</h2>
+    <div class="nota">Importe total de presupuestos FIRMADOS que el asesor quiere firmar durante el año. El sistema asume un objetivo mensual igual (total ÷ 12).</div>
+    <label>Importe objetivo (€)</label>
+    <input type="text" id="m-obj" placeholder="Ej: 450.000 o 450000" value="${eco.objetivo_monto ? eco.objetivo_monto : ""}">
+    <div class="pie"><button class="acc" onclick="cerrarModal()">Cancelar</button>
+    <button class="acc primary" onclick="guardarObjetivo()">Guardar</button></div>`);
+  document.getElementById("m-obj").focus();
+}
+function guardarObjetivo(){
+  const valor = document.getElementById("m-obj").value.trim();
+  cerrarModal(); accion("set_objetivo", {monto: valor});
+}
+
+function modalReprogramar(id, fechaActual){
+  abrirModal(`
+    <h2>Reprogramar envío</h2>
+    <label>Nueva fecha</label><input type="date" id="m-re-fecha" value="${esc(fechaActual)}">
+    <label>Hora</label><input type="time" id="m-re-hora" value="09:00">
+    <div class="pie"><button class="acc" onclick="cerrarModal()">Cancelar</button>
+    <button class="acc primary" onclick="confirmarReprogramar('${esc(id)}')">Guardar</button></div>`);
+}
+function confirmarReprogramar(id){
+  const fecha = document.getElementById("m-re-fecha").value;
+  if(!fecha){ toast("Indique la fecha"); return; }
+  cerrarModal(); accion("reprogramar", {id, fecha, hora: document.getElementById("m-re-hora").value});
+}
+
+/* agenda real de Google (caché de 5 min) */
+let agendaGoogle = {cargada: null, momento: 0};
+
+function cargarAgendaGoogle(forzar){
+  const cont = document.getElementById("agenda-google");
+  if (!cont) return;
+  const fresco = (Date.now() - agendaGoogle.momento) < 5 * 60 * 1000;
+  if (agendaGoogle.cargada && fresco && !forzar){
+    pintarAgendaGoogle(cont); return;
+  }
+  cont.innerHTML = '<p class="nota">Cargando su calendario real…</p>';
+  fetch("/api/agenda").then(r => r.json()).then(resp => {
+    if (!resp.ok){ cont.innerHTML = '<p class="nota">No se pudo leer el calendario ahora mismo.</p>'; return; }
+    agendaGoogle = {cargada: resp.eventos, momento: Date.now()};
+    pintarAgendaGoogle(cont);
+  }).catch(() => { cont.innerHTML = '<p class="nota">No se pudo leer el calendario ahora mismo.</p>'; });
+}
+
+function pintarAgendaGoogle(cont){
+  const eventos = agendaGoogle.cargada || [];
+  if (!eventos.length){
+    cont.innerHTML = '<p class="nota" style="margin-top:8px">Nada agendado en los próximos 14 días en Google Calendar.</p>';
+    return;
+  }
+  cont.innerHTML = eventos.map(ev => `
+    <div style="display:flex; gap:10px; align-items:baseline; padding:5px 8px; margin-top:4px;
+        border-radius:6px; background:var(--fondo)">
+      <span style="font-size:12px; white-space:nowrap"><b>${fFecha(ev.fecha)}</b>
+        ${ev.hora !== "todo el día" ? `<b>${esc(ev.hora)}</b>${ev.hora_fin ? "–" + esc(ev.hora_fin) : ""}` : "🔒"}</span>
+      <span style="font-size:12px"><b>${esc(ev.titulo)}</b>${ev.ubicacion ? ` <span class="nota">· ${esc(ev.ubicacion)}</span>` : ""}</span>
+      <span style="margin-left:auto; white-space:nowrap">
+        <span class="venta-origen ${ev.del_sistema ? "v-auto" : "v-manual"}">${ev.del_sistema ? "🤖 del sistema" : "✍️ a mano"}</span></span>
+    </div>`).join("");
+}
+
+/* ── Citas ── */
+const MES_CORTO = ["E","F","M","A","M","J","J","A","S","O","N","D"];
+
+function vistaCitas(){
+  const citas = EST.citas;
+  const m = EST.metricas;
+  const resueltas = citas.filter(c => c.estado === "efectuada");
+  const conResultado = resueltas.filter(c => c.resultado && c.resultado.dio_resultado);
+  const maxBarra = Math.max(m.citas_programadas, m.citas_efectuadas,
+                            m.citas_canceladas, conResultado.length, 1);
+  const barra = (t, n, color) => n || t ? `
+    <div style="margin:6px 0"><div style="display:flex; justify-content:space-between; font-size:12px">
+      <span>${t}</span><b>${n}</b></div>
+      <div class="progreso" style="height:14px"><div style="width:${Math.round(100 * n / maxBarra)}%; background:${color}"></div></div></div>` : "";
+  const hoyISO = EST.hoy;
+  const futuras = citas.filter(c => c.estado === "programada")
+    .sort((a, b) => (a.fecha + a.hora).localeCompare(b.fecha + b.hora));
+  const pasadas = citas.filter(c => c.estado !== "programada")
+    .sort((a, b) => (b.fecha + (b.hora || "")).localeCompare(a.fecha + (a.hora || "")));
+  setTimeout(() => cargarAgendaGoogle(), 50);
+  return `
+  <div class="tarjeta"><h3>📊 Citas</h3>
+    ${barra("📅 Programadas", m.citas_programadas, "var(--azul2)")}
+    ${barra("✅ Efectuadas", m.citas_efectuadas, "var(--verde)")}
+    ${barra("❌ Canceladas", m.citas_canceladas, "var(--rojo)")}
+    ${barra("💼 Efectuadas con resultado (contrato/venta)", conResultado.length, "var(--amarillo)")}
+    <div style="margin-top:4px">🔁 Modificaciones: <b>${m.citas_modificaciones}</b>
+      · Tasa de resultado: <b>${resueltas.length ? Math.round(100 * conResultado.length / resueltas.length) + "%" : "—"}</b></div>
+    <div style="margin-top:8px"><button class="acc primary" onclick="modalAgendarCita()">➕ Añadir cita (sin cliente: solo Calendar)</button></div>
+  </div>
+  <div class="tarjeta"><h3>📆 Agenda de Google (próximos 14 días)
+      <button class="acc" style="margin-left:auto" onclick="cargarAgendaGoogle(true)">🔄 Actualizar</button></h3>
+    <div id="agenda-google"><p class="nota">Cargando su calendario real…</p></div>
+  </div>
+  <div class="tarjeta"><h3>📅 Próximas citas del sistema (${futuras.length})</h3>
+    ${futuras.length ? futuras.map(cFila).join("") : `<p class="nota">Ninguna. Desde un seguimiento con «📅 Agendar» o con el botón de arriba.</p>`}
+  </div>
+  <div class="tarjeta"><h3>🗂️ Historial de citas (${pasadas.length})</h3>
+    ${pasadas.length ? pasadas.map(cFila).join("") : `<p class="nota">Aún no hay citas efectuadas ni canceladas.</p>`}
+  </div>`;
+}
+
+function cFila(c){
+  const cli = EST.clientes.find(x => x.id === c.cliente_id);
+  const estadoBadge = {
+    programada: `<span class="badge b-media">📅 Programada</span>`,
+    efectuada: `<span class="badge b-firmado">✅ Efectuada</span>`,
+    cancelada: `<span class="badge b-rojo">❌ Cancelada</span>`,
+  }[c.estado];
+  const res = c.resultado
+    ? (c.resultado.dio_resultado
+        ? ` <span class="badge b-firmado">💼 con resultado</span>${c.resultado.nota ? " " + esc(c.resultado.nota) : ""}`
+        : ` <span class="badge b-ajeno">sin resultado</span>`)
+    : "";
+  const mods = c.modificaciones.length ? ` · 🔁 ${c.modificaciones.length}` : "";
+  return `<div style="border-top:1px dashed var(--borde); padding:8px 0">
+    <b>${esc(c.titulo)}</b> ${estadoBadge}${res} <span class="nota">${mods}</span><br>
+    <span class="nota">${fFecha(c.fecha)} ${esc(c.hora || "")} · ${esc(c.ubicacion || "")}
+      · ${esc(cli ? cli.nombre : "(sin cliente)")}${c.seguimiento_id ? " · " + esc(c.seguimiento_id) : ""}
+      ${c.orden_mail ? " · borrador: " + esc(c.orden_mail) : ""}</span>
+    ${c.estado === "programada" ? `<div style="margin-top:6px">
+        <button class="acc" onclick="modalReprogramarCita('${esc(c.id)}','${esc(c.fecha)}','${esc(c.hora || "09:00")}')">Reprogramar</button>
+        <button class="acc" onclick="modalCancelarCita('${esc(c.id)}')">Cancelar</button>
+        <button class="acc" onclick="accion('efectuar_cita',{id:'${esc(c.id)}'})">✅ Efectuada</button></div>` : ""}
+    ${c.estado === "efectuada" && !c.resultado ? `<div style="margin-top:6px">
+        <button class="acc" onclick="modalResultadoCita('${esc(c.id)}',true)">💼 Dio resultado</button>
+        <button class="acc" onclick="modalResultadoCita('${esc(c.id)}',false)">Sin resultado</button></div>` : ""}
+  </div>`;
+}
+
+function modalAgendarCita(idSeg){
+  const s = idSeg ? EST.seguimientos.find(x => x.id === idSeg) : null;
+  const cli = s ? EST.clientes.find(c => c.id === s.cliente_id) : null;
+  const opcClientes = `<option value="">(sin cliente)</option>` + EST.clientes
+    .map(c => `<option value="${esc(c.id)}" ${cli && cli.id === c.id ? "selected" : ""}>${esc(c.nombre)} (${esc(c.id)})</option>`)
+    .join("");
+  abrirModal(`
+    <h2>📅 Agendar cita</h2>
+    <label>Cliente (dejar vacío para cita personal/interna)</label>
+    <select id="m-c-cli" ${s && cli ? "disabled" : ""}>${opcClientes}</select>
+    <label>Título</label>
+    <input type="text" id="m-c-titulo" value="${s ? "Visita/reunión — " + esc(cli?.nombre || s.id) : ""}" placeholder="Ej: Visita técnica Soria 33">
+    <div style="display:flex; gap:10px">
+      <div style="flex:1"><label>Fecha</label><input type="date" id="m-c-fecha" value="${EST.hoy}"></div>
+      <div><label>Hora</label><input type="time" id="m-c-hora" value="10:00"></div>
+      <div><label>Duración (min)</label><input type="number" id="m-c-dur" value="60" style="width:80px"></div>
+    </div>
+    <div id="m-c-ocup"></div>
+    <label>Ubicación</label>
+    <input type="text" id="m-c-ubic" value="${s && cli ? esc(cli.direccion || "") : ""}">
+    <label>Texto guía para el mail al cliente (opcional; vacío = el agente lo redacta desde el hilo)</label>
+    <input type="text" id="m-c-guia" placeholder="Ej: avisarle que paso el jueves a ver el motor">
+    <div class="nota" style="margin:6px 0">La cita entra en su Calendar (sin invitaciones automáticas) y el aviso al cliente se deja como BORRADOR en el hilo.</div>
+    <div class="pie"><button class="acc" onclick="cerrarModal()">Cancelar</button>
+    <button class="acc primary" onclick="guardarCita('${esc(idSeg || "")}')">Crear cita</button></div>`);
+  document.getElementById("m-c-fecha").addEventListener("change", verOcupacionCita);
+  document.getElementById("m-c-hora").addEventListener("input", verOcupacionCita);
+  document.getElementById("m-c-dur").addEventListener("input", verOcupacionCita);
+  verOcupacionCita();
+}
+
+/* ocupación del día + aviso de solapamiento (crear y reprogramar) */
+const H_INI = 8, H_FIN = 20;
+function aMin(hhmm){ const [h, m] = hhmm.split(":").map(Number); return h * 60 + (m || 0); }
+
+function pintarOcupacion(cont, fecha, bloques, propuesta){
+  // propuesta = {ini, fin} en minutos, para marcar conflicto
+  let aviso = "";
+  const choques = propuesta ? bloques.filter(b =>
+    b.todo_el_dia || (propuesta.ini < aMin(b.fin) && propuesta.fin > aMin(b.ini))) : [];
+  if (propuesta){
+    aviso = choques.length
+      ? `<div class="b-rojo" style="padding:8px 10px; border-radius:6px; margin:8px 0 0">⚠️ <b>Ojo: se pisa con</b> ` +
+        choques.map(c => `"${esc(c.titulo)}" (${c.inicio}–${c.fin})`).join(", ") +
+        `. Puedes crearla igual si te conviene.</div>`
+      : `<div class="b-firmado" style="padding:8px 10px; border-radius:6px; margin:8px 0 0">✅ Franja libre en su agenda</div>`;
+  }
+  const filas = bloques.map(b => {
+    const choca = propuesta && (propuesta.ini < aMin(b.fin) && propuesta.fin > aMin(b.ini));
+    return `<div style="display:flex; gap:10px; align-items:baseline; padding:5px 8px; margin-top:4px;
+        border-radius:6px; ${choca ? "background:#fdecea; border:1px solid #f5c6cb" : "background:var(--fondo)"}">
+        <span style="font-size:12px; white-space:nowrap"><b>${b.todo_el_dia ? "🔒 todo el día" : esc(b.inicio) + " – " + esc(b.fin)}</b></span>
+        <span style="font-size:12px">${choca ? "🔴 " : "🔒 "}${esc(b.titulo)}</span></div>`;
+  }).join("");
+  cont.innerHTML = `
+    <div style="margin:10px 0 2px"><b style="font-size:12px">🗓️ Su agenda del ${esc(fecha)}:</b>
+      ${bloques.length ? "" : ' <span class="nota">libre todo el día</span>'}</div>
+    ${filas}
+    ${!bloques.length ? "" : aviso}`;
+}
+
+async function verOcupacionCita(){
+  const cont = document.getElementById("m-c-ocup");
+  if (!cont) return;
+  const fecha = document.getElementById("m-c-fecha").value;
+  const hora = document.getElementById("m-c-hora").value || "10:00";
+  const dur = parseInt(document.getElementById("m-c-dur").value) || 60;
+  cont.innerHTML = '<p class="nota">Consultando su agenda…</p>';
+  try {
+    const r = await fetch("/api/ocupacion?fecha=" + encodeURIComponent(fecha));
+    const resp = await r.json();
+    if (!resp.ok){ cont.innerHTML = ""; return; }
+    pintarOcupacion(cont, fecha, resp.bloques, {ini: aMin(hora), fin: aMin(hora) + dur});
+  } catch (e) { cont.innerHTML = ""; }
+}
+
+function guardarCita(idSeg){
+  const s = idSeg ? EST.seguimientos.find(x => x.id === idSeg) : null;
+  const payload = {
+    seguimiento_id: idSeg || null,
+    cliente_id: (s?.cliente_id) || document.getElementById("m-c-cli").value || null,
+    titulo: document.getElementById("m-c-titulo").value.trim(),
+    fecha: document.getElementById("m-c-fecha").value,
+    hora: document.getElementById("m-c-hora").value,
+    duracion_min: document.getElementById("m-c-dur").value,
+    ubicacion: document.getElementById("m-c-ubic").value,
+    texto_guia: document.getElementById("m-c-guia").value.trim() || null,
+  };
+  if (!payload.titulo || !payload.fecha || !payload.hora){
+    toast("Título, fecha y hora son obligatorios"); return;
+  }
+  cerrarModal(); accion("crear_cita", payload);
+}
+
+function modalReprogramarCita(id, fecha, hora){
+  abrirModal(`
+    <h2>🔁 Reprogramar cita</h2>
+    <div style="display:flex; gap:10px">
+      <div style="flex:1"><label>Nueva fecha</label><input type="date" id="m-r-fecha" value="${esc(fecha)}"></div>
+      <div><label>Hora</label><input type="time" id="m-r-hora" value="${esc(hora)}"></div>
+    </div>
+    <div id="m-r-ocup"></div>
+    <label>Texto guía para el mail al cliente (opcional)</label>
+    <input type="text" id="m-r-guia" placeholder="Ej: se retrasa porque espero pieza">
+    <div class="pie"><button class="acc" onclick="cerrarModal()">Cancelar</button>
+    <button class="acc primary" onclick="confirmarReprogramarCita('${esc(id)}')">Reprogramar</button></div>`);
+  const cont = document.getElementById("m-r-ocup");
+  const comprobar = async () => {
+    const f = document.getElementById("m-r-fecha").value;
+    const h = document.getElementById("m-r-hora").value || "09:00";
+    if (!f){ cont.innerHTML = ""; return; }
+    cont.innerHTML = '<p class="nota">Consultando su agenda…</p>';
+    try {
+      const r = await fetch("/api/ocupacion?fecha=" + encodeURIComponent(f));
+      const resp = await r.json();
+      if (!resp.ok){ cont.innerHTML = ""; return; }
+      const cita = EST.citas.find(c => c.id === id);
+      const dur = (cita && cita.duracion_min) || 60;
+      // excluir la propia cita de la lista de ocupación (aún está en el calendario)
+      pintarOcupacion(cont, f, resp.bloques.filter(b => b.titulo !== (cita?.titulo || "")),
+                      {ini: aMin(h), fin: aMin(h) + dur});
+    } catch (e) { cont.innerHTML = ""; }
+  };
+  document.getElementById("m-r-fecha").addEventListener("change", comprobar);
+  document.getElementById("m-r-hora").addEventListener("input", comprobar);
+  comprobar();
+}
+function confirmarReprogramarCita(id){
+  const fecha = document.getElementById("m-r-fecha").value;
+  const hora = document.getElementById("m-r-hora").value;
+  if (!fecha || !hora){ toast("Indica fecha y hora"); return; }
+  cerrarModal(); accion("reprogramar_cita", {id, fecha, hora,
+    texto_guia: document.getElementById("m-r-guia").value.trim() || null});
+}
+
+function modalCancelarCita(id){
+  abrirModal(`
+    <h2>❌ Cancelar cita</h2>
+    <label>Motivo / texto guía para el mail al cliente (opcional)</label>
+    <input type="text" id="m-x-guia" placeholder="Ej: la avería quedó resuelta, no hace falta la visita">
+    <div class="pie"><button class="acc" onclick="cerrarModal()">Cancelar</button>
+    <button class="acc primary" onclick="accion('cancelar_cita',{id:'${esc(id)}',texto_guia:document.getElementById('m-x-guia').value.trim()||null});cerrarModal()">Cancelar cita</button></div>`);
+}
+
+function modalResultadoCita(id, dioResultado){
+  abrirModal(`
+    <h2>💼 Resultado de la cita</h2>
+    <div class="nota">${dioResultado ? "La cita dio resultado (contrato/venta/mantenimiento). Si ya registraste la venta en 💰 Ventas, indícala aquí para vincularla." : "La cita no dio resultado. Puedes dejar una nota de por qué."}</div>
+    ${dioResultado ? `
+    <label>Venta vinculada (id, opcional)</label><input type="text" id="m-res-venta" placeholder="VEN-0002">
+    <label>Presupuesto vinculado (id, opcional)</label><input type="text" id="m-res-pre" placeholder="PRE-0002">` : ""}
+    <label>Nota</label>
+    <input type="text" id="m-res-nota" placeholder="${dioResultado ? "Ej: firman mantenimiento 2027" : "Ej: lo dejan para el año que viene"}">
+    <div class="pie"><button class="acc" onclick="cerrarModal()">Cancelar</button>
+    <button class="acc primary" onclick="guardarResultado('${esc(id)}',${dioResultado})">Guardar</button></div>`);
+}
+function guardarResultado(id, dioResultado){
+  cerrarModal(); accion("resultado_cita", {
+    id, dio_resultado: dioResultado,
+    venta_id: dioResultado ? (document.getElementById("m-res-venta")?.value.trim() || null) : null,
+    presupuesto_id: dioResultado ? (document.getElementById("m-res-pre")?.value.trim() || null) : null,
+    nota: document.getElementById("m-res-nota")?.value.trim() || null,
+  });
+}
+
+/* ── Vinculaciones / duplicados ── */
+function vistaVinculaciones(){
+  const sv = EST.sin_vincular;
+  const dup = EST.duplicados;
+  return `
+  <div class="tarjeta">
+    <h3>❓ Contactos sin vincular (${sv.length})</h3>
+    <p class="nota">Mails o teléfonos que el sistema no ha sabido emparejar con un cliente. Vincúlelos usted o cree un cliente nuevo.</p>
+    ${sv.length ? sv.map(s => `
+      <div class="tarjeta" style="margin-top:10px">
+        <b>${esc(s.valor)}</b> <span class="badge b-media">${s.tipo === "telefono" ? "📞 Teléfono" : "✉️ Email"}</span>
+        ${s.pista ? `<div class="nota">Pista: ${esc(s.pista)}</div>` : ""}
+        <div class="fila">
+          <input type="text" placeholder="Buscar cliente…" style="flex:1; padding:7px 10px; border:1px solid var(--borde); border-radius:6px"
+                 oninput="buscarClienteParaVincular(this,'${esc(s.valor)}')">
+          <span id="res-${esc(s.valor.replace(/[^a-zA-Z0-9]/g,""))}"></span>
+        </div>
+      </div>`).join("") : `<p class="nota" style="margin-top:8px">✅ Todo emparejado</p>`}
+  </div>
+  <div class="tarjeta">
+    <h3>👥 Posibles duplicados (${dup.length})</h3>
+    <p class="nota">Parejas detectadas con el mismo email o la misma dirección. Revise y fusione si son la misma comunidad/administración.</p>
+    ${dup.length ? dup.map(d => `
+      <div class="tarjeta" style="margin-top:10px">
+        <b>[${esc(d.tipo)}] ${esc(d.valor)}</b>
+        <div class="fila">
+          <select id="dup-${esc(d.valor.replace(/[^a-zA-Z0-9]/g,""))}">
+            ${d.clientes.map(cli => `<option value="${esc(cli)}">${esc(cli)}</option>`).join("")}
+          </select>
+          <span class="nota">← ficha que se conserva</span>
+          <button class="acc primary" onclick="fusionarDesdeSelect('${esc(d.valor.replace(/[^a-zA-Z0-9]/g,""))}')">Fusionar</button>
+        </div>
+      </div>`).join("") : `<p class="nota" style="margin-top:8px">✅ Sin duplicados detectados</p>`}
+  </div>`;
+}
+
+/* vincular desde búsqueda: se delega en el modal de ficha */
+function buscarClienteParaVincular(input, valor){
+  const texto = input.value.trim().toLowerCase();
+  const cont = input.parentElement.querySelector("span[id^=res-]");
+  if(texto.length < 2){ cont.innerHTML = ""; return; }
+  const opciones = EST.clientes.filter(c =>
+    (c.nombre + " " + c.poblacion).toLowerCase().includes(texto)).slice(0, 8);
+  cont.innerHTML = `
+    <select style="padding:7px; border:1px solid var(--borde); border-radius:6px">
+      ${opciones.map(c => `<option value="${esc(c.id)}">${esc(c.nombre)} (${esc(c.id)})</option>`).join("")}
+    </select>
+    <button class="acc primary" onclick="confirmarVinculo(this,'${esc(valor)}')">Vincular</button>
+    <button class="acc" onclick="crearClienteDesdeVinculo(this,'${esc(valor)}')">Crear cliente nuevo</button>`;
+}
+
+function confirmarVinculo(boton, valor){
+  const select = boton.parentElement.querySelector("select");
+  const idCli = select.value;
+  const tipo = valor.includes("@") ? "email" : "telefono";
+  accion("vincular", {valor, tipo, cliente_id: idCli});
+}
+
+function crearClienteDesdeVinculo(boton, valor){
+  const tipo = valor.includes("@") ? "email" : "telefono";
+  abrirModal(`
+    <h2>Crear cliente nuevo</h2>
+    <div class="nota">Contacto a vincular: <b>${esc(valor)}</b></div>
+    <label>Nombre</label><input type="text" id="m-cc-nombre">
+    <div style="display:flex; gap:10px">
+      <div style="flex:1"><label>Población</label><input type="text" id="m-cc-pob"></div>
+      <div style="flex:1"><label>Tipo</label><select id="m-cc-tipo"><option value="prospecto">Prospecto</option><option value="cliente">Cliente</option></select></div>
+    </div>
+    <div class="pie"><button class="acc" onclick="cerrarModal()">Cancelar</button>
+    <button class="acc primary" onclick="confirmarCrearCliente('${esc(valor)}','${tipo}')">Crear</button></div>`);
+  document.getElementById("m-cc-nombre").focus();
+}
+function confirmarCrearCliente(valor, tipo){
+  const nombre = document.getElementById("m-cc-nombre").value.trim();
+  if(!nombre){ toast("Indique el nombre"); return; }
+  cerrarModal();
+  accion("crear_cliente", {valor, tipo_contacto: tipo, nombre,
+    poblacion: document.getElementById("m-cc-pob").value.trim(),
+    tipo: document.getElementById("m-cc-tipo").value});
+}
+
+function fusionarDesdeSelect(idSelect){
+  const select = document.getElementById("dup-" + idSelect);
+  if(!select){ toast("No se encontró la pareja"); return; }
+  const destino = select.value;
+  const todos = [...select.options].map(o => o.value);
+  const absorbido = todos.find(v => v !== destino);
+  if(!absorbido){ toast("No hay pareja que fusionar"); return; }
+  if(confirm(`¿Fusionar «${absorbido}» dentro de «${destino}»? La ficha absorbida se archiva y no se pierde.`)){
+    accion("fusionar", {id_destino: destino.split(" ")[0], id_absorbido: absorbido.split(" ")[0]});
+  }
+}
+
+/* ── Modal del hilo (conversación completa) ── */
+let hiloOrdenNuevoPrimero = true;   // por defecto: la más nueva arriba
+let hiloActual = null;              // mensajes en memoria para el toggle ⇅
+
+function hiloMensaje(m){
+  return `
+    <div style="border-top:1px solid var(--borde); padding:8px 0">
+      <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap">
+        <span class="badge ${m.tipo === "ENVIADO" ? "b-firmado" : m.tipo === "BORRADOR" ? "b-borrador" : "b-media"}">${m.tipo}</span>
+        <b style="font-size:12px">${esc(m.de)}</b>
+        <span class="nota" style="margin-left:auto">${esc(m.fecha)}</span>
+      </div>
+      <div style="font-size:12px; white-space:pre-wrap; max-height:150px; overflow:auto;
+                  background:var(--fondo); border-radius:6px; padding:8px; margin-top:4px">${esc(m.cuerpo || "")}</div>
+    </div>`;
+}
+
+function hiloPintar(titulo){
+  const msgs = [...hiloActual].sort((a, b) => {
+    const fa = new Date(a.fecha), fb = new Date(b.fecha);
+    return hiloOrdenNuevoPrimero ? fb - fa : fa - fb;
+  });
+  abrirModal(`<h2>👁️ Conversación — ${esc(titulo || "")}
+      <button class="acc" style="font-size:11px; margin-left:8px" onclick="hiloInvertir('${esc(titulo || "")}')" title="Cambiar entre más nueva primero / más antigua primero">${hiloOrdenNuevoPrimero ? "⇅ Más antigua primero" : "⇅ Más nueva primero"}</button></h2>
+    ${msgs.map(hiloMensaje).join("")}
+    <div class="pie"><button class="acc" onclick="cerrarModal()">Cerrar</button></div>`);
+}
+
+function hiloInvertir(titulo){
+  hiloOrdenNuevoPrimero = !hiloOrdenNuevoPrimero;
+  hiloPintar(titulo);
+}
+
+async function modalHilo(threadId, titulo){
+  abrirModal(`<h2>👁️ Conversación — ${esc(titulo || "")}</h2>
+    <p class="nota">Cargando hilo de Gmail…</p>`);
+  try {
+    const r = await fetch("/api/hilo/" + encodeURIComponent(threadId));
+    const resp = await r.json();
+    if (!resp.ok){ toast(resp.error || "No se pudo leer el hilo"); cerrarModal(); return; }
+    hiloActual = resp.mensajes || [];
+    hiloPintar(titulo);
+  } catch (e) {
+    toast("No se pudo conectar con Gmail"); cerrarModal();
+  }
+}
+
+/* ── Botonera superior: procesar ahora / importar clientes ── */
+let botoneraOcupada = false;
+function botoneraClick(boton, tipo){
+  if (botoneraOcupada){ toast("Ya hay un proceso lanzado — espera unos minutos"); return; }
+  botoneraOcupada = true;
+  const texto = boton.textContent;
+  boton.disabled = true;
+  boton.textContent = "⏳ lanzado…";
+  accion(tipo, {}).finally(() => {
+    setTimeout(() => { botoneraOcupada = false; boton.disabled = false; boton.textContent = texto; }, 60000);
+  });
+}
+function botonProcesar(){ botoneraClick(document.getElementById("btn-procesar"), "procesar_ahora"); }
+function botonImportar(){ botoneraClick(document.getElementById("btn-importar"), "importar_clientes"); }
+
+/* ── Modal genérico ── */
+function abrirModal(html){
+  document.getElementById("modal-raiz").innerHTML =
+    `<div class="fondo-modal" onclick="if(event.target===this)cerrarModal()"><div class="modal">
+      <div class="cabecera-fija"><button onclick="cerrarModal()" title="Cerrar (o haz click fuera)">✕ Cerrar</button></div>
+      ${html}</div></div>`;
+}
+function cerrarModal(){ document.getElementById("modal-raiz").innerHTML = ""; }
+
+/* ── Arranque ── */
+document.addEventListener("input", e => {
+  if(e.target.id === "f-seg-texto"){ filtroSeg.texto = e.target.value; renderSegTbody(); }
+  if(e.target.id === "f-cli-texto"){ filtroCli.texto = e.target.value; renderCliTbody(); }
+});
+document.addEventListener("change", e => {
+  if(e.target.id === "f-seg-cat"){ filtroSeg.categoria = e.target.value; render(); }
+  if(e.target.id === "f-seg-estado"){ filtroSeg.estado = e.target.value; render(); }
+  if(e.target.id === "f-seg-prio"){ filtroSeg.prioridad = e.target.value; render(); }
+  if(e.target.id === "f-cli-prop"){ filtroCli.propiedad = e.target.value; render(); }
+  if(e.target.id === "f-cli-tipo"){ filtroCli.tipo = e.target.value; render(); }
+});
+/* repintado suave de la tabla sin perder el foco del buscador */
+function renderSegTbody(){
+  const html = vistaSeguimientos();
+  document.getElementById("contenido").innerHTML = html;
+  const inp = document.getElementById("f-seg-texto");
+  inp.value = filtroSeg.texto; inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length);
+}
+function renderCliTbody(){
+  const html = vistaClientes();
+  document.getElementById("contenido").innerHTML = html;
+  const inp = document.getElementById("f-cli-texto");
+  inp.value = filtroCli.texto; inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length);
+}
+
+document.addEventListener("keydown", e => { if(e.key === "Escape") cerrarModal(); });
+
+cargar().catch(err => {
+  document.getElementById("contenido").innerHTML =
+    `<div class="tarjeta"><h3>No se pudo conectar con el servidor local</h3>
+     <p class="nota">Cierre esta pestaña y vuelva a abrir el panel con su icono habitual.</p></div>`;
+});
+</script>
+</body>
+</html>

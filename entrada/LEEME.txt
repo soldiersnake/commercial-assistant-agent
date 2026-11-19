@@ -1,0 +1,19 @@
+════════════════════════════════════════════════════════════
+  CARPETA DE ENTRADA — Gestor Comercial
+════════════════════════════════════════════════════════════
+
+ASESOR: deposita aquí el fichero Excel con la lista de clientes
+(.xlsx o .csv). No hay que hacer nada más.
+
+El sistema lo detectará en la siguiente corrida automática
+(7:00 / 16:00) o al pulsar "Procesar Ahora", y:
+
+  1. Creará/actualizará las fichas de cada comunidad.
+  2. Marcará cada cliente como PROPIO o AJENO (lo podrás
+     cambiar desde el panel con un clic).
+  3. Detectará posibles duplicados para que tú decidas.
+  4. Archivará el fichero original en la subcarpeta
+     "procesados/" con la fecha de importación.
+
+Si el fichero tiene un formato distinto al esperado, el
+sistema lo avisará en el panel y no tocará tus datos.
