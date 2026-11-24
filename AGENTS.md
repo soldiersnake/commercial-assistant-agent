@@ -29,13 +29,15 @@ datos/               ← LA MEMORIA (fuente de verdad de los datos)
   plantillas/*.md    ← escritos estándar editables
 scripts/             ← Python: sync, importador, utilidades
 dashboard/           ← mini-app local (HTML + servidor pequeño)
+  asistente.py       ← asistente de primer uso (/api/setup/*, Fase 7)
 mcp-gmail/           ← MCP: SOLO lectura + borradores (nunca enviar)
 tests/               ← pruebas
 ```
 
-> **Nota:** `datos/config.json` no va al git. Se crea copiando
-> `datos/config.example.json` y rellenando nombre de la empresa,
-> asesor, contactos y dominios.
+> **Nota:** `datos/config.json` no va al git. Lo crea el asistente del
+> panel (⚙️ Configuración → Tus datos) o se copia a mano desde
+> `datos/config.example.json`. El estado del asistente (modo demo/real,
+> email de Google conectado) vive en `datos/asistente.json` (tampoco va al git).
 
 ## 3. Reglas de oro (inviolables)
 

@@ -27,6 +27,7 @@ datos/archivo/
 datos/acciones/
 datos/corridas/
 datos/informe_importacion.json
+datos/asistente.json
 datos/_debug*
 datos/serv_*.log
 

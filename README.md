@@ -150,15 +150,19 @@ Este sistema está pensado para quien **no puede pagar una suscripción de IA**.
 
 ## 🚀 Empezar en 10 minutos
 
-1. **Configura la IA** (gratis): [docs/CONFIGURACION.md → Paso 1](docs/CONFIGURACION.md#paso-1-configura-la-ía-coste-cero).
-2. **Conecta tu correo y tu calendario** (OAuth en el navegador, sin contraseñas en la app): [docs/CONFIGURACION.md → Paso 2](docs/CONFIGURACION.md#paso-2-conecta-tu-correo-y-tu-calendario-oauth).
-3. **Personaliza tu config**: copia `datos/config.example.json` a `datos/config.json` y pon tu nombre, tu empresa, tu dominio y tus contactos.
-4. **Importa tu cartera**: deja tu Excel en `entrada/` y ejecuta `Importar Clientes.bat`.
-5. **Abre el panel**: doble clic en `Panel de Gestion.bat` → `http://127.0.0.1:8765`.
-6. **Prueba una corrida**: doble clic en `Procesar Ahora.bat` y mira cómo clasifica y prepara borradores.
-7. **¿Sin Excel a mano?** `python scripts/demo_data.py` genera una cartera ficticia para explorar el panel sin riesgo.
+1. **Instala el proyecto** (una vez, necesitas [Python 3.12+](https://www.python.org/downloads/)): abre un terminal en la carpeta del proyecto y ejecuta
+   ```powershell
+   python -m venv .venv
+   .venv\Scripts\pip install -r requirements.txt
+   ```
+   Crea la carpeta `.venv` con Python y sus librerías (el equivalente a `npm install`). Los `.bat` la usan: sin ella, Windows dirá que no encuentra `.venv\Scripts\python.exe`.
+2. **Abre el panel**: doble clic en `Panel de Gestion.bat` → `http://127.0.0.1:8765`.
+3. **Elige cómo empezar** en la pantalla de bienvenida:
+   - 🧪 **Probar con datos de ejemplo**: una cartera ficticia para explorar el panel sin conectar nada.
+   - 🚀 **Empezar con mis datos**: un asistente visual te guía paso a paso para **conectar tu Gmail y tu calendario** (crear tu credencial de Google y dar permiso, sin consola), **tus datos y tu empresa**, **tu lista de clientes** (con plantilla Excel descargable) y **el asistente de IA**. Puedes volver a él cuando quieras con el botón ⚙️ *Configuración*.
+4. **Prueba una corrida**: botón ⚡ *Procesar ahora* del panel (o `Procesar Ahora.bat`) y mira cómo clasifica y prepara borradores.
 
-Guía completa con capturas: **[docs/CONFIGURACION.md](docs/CONFIGURACION.md)**.
+Guía detallada (también para hacerlo a mano, sin el asistente): **[docs/CONFIGURACION.md](docs/CONFIGURACION.md)**.
 
 ## 📂 Estructura del proyecto
 
@@ -319,15 +323,19 @@ This system is designed for people who **cannot pay for an AI subscription**. Th
 
 ## 🚀 Get started in 10 minutes
 
-1. **Set up the AI** (free): [docs/CONFIGURACION.md → Step 1](docs/CONFIGURACION.md#paso-1-configura-la-ía-coste-cero).
-2. **Connect your email and calendar** (OAuth in the browser, no passwords in the app): [docs/CONFIGURACION.md → Step 2](docs/CONFIGURACION.md#paso-2-conecta-tu-correo-y-tu-calendario-oauth).
-3. **Customize your config**: copy `datos/config.example.json` to `datos/config.json` with your name, company, domain and contacts.
-4. **Import your portfolio**: drop your Excel into `entrada/` and run `Importar Clientes.bat`.
-5. **Open the dashboard**: double-click `Panel de Gestion.bat` → `http://127.0.0.1:8765`.
-6. **Try a run**: double-click `Procesar Ahora.bat` and watch it classify and prepare drafts.
-7. **No Excel at hand?** `python scripts/demo_data.py` generates a fictional portfolio so you can explore the dashboard risk-free.
+1. **Install the project** (once, requires [Python 3.12+](https://www.python.org/downloads/)): open a terminal in the project folder and run
+   ```powershell
+   python -m venv .venv
+   .venv\Scripts\pip install -r requirements.txt
+   ```
+   This creates the `.venv` folder with Python and its libraries (the equivalent of `npm install`). The `.bat` launchers rely on it: without it, Windows reports it cannot find `.venv\Scripts\python.exe`.
+2. **Open the dashboard**: double-click `Panel de Gestion.bat` → `http://127.0.0.1:8765`.
+3. **Choose how to start** on the welcome screen:
+   - 🧪 **Try it with sample data**: a fictional portfolio to explore the dashboard without connecting anything.
+   - 🚀 **Start with my data**: a visual step-by-step wizard to **connect Gmail and Calendar** (create your Google credential and grant access, no console needed), **your details and company**, **your client list** (with a downloadable Excel template) and **the AI assistant**. Reopen it any time with the ⚙️ *Configuración* button.
+4. **Try a run**: the ⚡ *Procesar ahora* button in the dashboard (or `Procesar Ahora.bat`) and watch it classify and prepare drafts.
 
-Full guide with screenshots: **[docs/CONFIGURACION.md](docs/CONFIGURACION.md)**.
+Detailed guide (including the manual, wizard-free setup): **[docs/CONFIGURACION.md](docs/CONFIGURACION.md)**.
 
 ---
 

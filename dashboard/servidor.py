@@ -6,6 +6,8 @@ expone una API mínima:
 
   GET  /api/estado   → instantánea completa de la memoria (datos/)
   POST /api/accion   → ejecuta una acción del panel sobre la memoria
+  /api/setup/*       → asistente de primer uso (dashboard/asistente.py):
+                       Google (credencial + OAuth), datos, clientes, IA
 
 Las acciones del panel escriben DIRECTAMENTE en la memoria (via
 scripts/memoria.py) salvo `responder`, que además deposita una
@@ -21,12 +23,15 @@ import sys
 from datetime import date, datetime
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
-from urllib.parse import parse_qs, urlparse
+from urllib.parse import parse_qs, quote, urlparse
 
 RAIZ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ / "scripts"))
 import memoria  # noqa: E402
 import gcal  # noqa: E402
+
+sys.path.insert(0, str(RAIZ / "dashboard"))
+import asistente  # noqa: E402
 
 HOST = "127.0.0.1"
 PUERTO = 8765
@@ -1129,6 +1134,37 @@ ACCIONES = {
 
 # ── Servidor HTTP ───────────────────────────────────────────────
 
+ORIGENES_LOCALES = {f"http://{HOST}:{PUERTO}", f"http://localhost:{PUERTO}"}
+
+
+def _setup_get(ruta: str) -> tuple[int, dict]:
+    """Rutas GET del asistente → (código HTTP, JSON)."""
+    if ruta == "/api/setup/estado":
+        return 200, asistente.estado()
+    if ruta == "/api/setup/google/conectar":
+        return 200, {"ok": True, "url": asistente.url_autorizacion()}
+    if ruta == "/api/setup/google/probar":
+        return 200, {"ok": True, "mensaje": asistente.probar_google()}
+    return 404, {"ok": False, "mensaje": f"ruta desconocida {ruta}"}
+
+
+def _setup_post(ruta: str, p: dict) -> dict:
+    """Rutas POST del asistente → JSON (siempre con el estado nuevo)."""
+    if ruta == "/api/setup/credencial":
+        resp = {"mensaje": asistente.guardar_credencial(p.get("contenido_b64", ""))}
+    elif ruta == "/api/setup/datos":
+        resp = {"mensaje": asistente.guardar_datos(p)}
+    elif ruta == "/api/setup/clientes":
+        resp = asistente.importar_clientes(p.get("nombre", ""), p.get("contenido_b64", ""))
+    elif ruta == "/api/setup/modo":
+        resp = {"mensaje": asistente.elegir_modo(p.get("modo", ""))}
+    elif ruta == "/api/setup/ia/gemini":
+        resp = {"mensaje": asistente.crear_settings_gemini()}
+    else:
+        raise asistente.ErrorAsistente(f"ruta desconocida {ruta}")
+    return {"ok": True, **resp, "setup": asistente.estado()}
+
+
 class Manejador(BaseHTTPRequestHandler):
 
     def _json(self, codigo: int, datos) -> None:
@@ -1139,8 +1175,52 @@ class Manejador(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(cuerpo)
 
+    def _redirigir(self, destino: str) -> None:
+        self.send_response(302)
+        self.send_header("Location", destino)
+        self.send_header("Content-Length", "0")
+        self.end_headers()
+
+    def _peticion_local(self) -> bool:
+        """El asistente escribe credenciales: solo se aceptan peticiones
+        hechas desde el propio panel (no desde otra web abierta en el
+        navegador) y dirigidas a 127.0.0.1/localhost."""
+        host = (self.headers.get("Host") or "").lower()
+        origen = self.headers.get("Origin")
+        return (host in {f"{HOST}:{PUERTO}", f"localhost:{PUERTO}"}
+                and (origen is None or origen in ORIGENES_LOCALES))
+
     def do_GET(self) -> None:
-        ruta = urlparse(self.path).path
+        url = urlparse(self.path)
+        ruta = url.path
+        if ruta == "/" and "state" in parse_qs(url.query):
+            # vuelta de Google tras «Conectar con Google»
+            params = {k: v[0] for k, v in parse_qs(url.query).items()}
+            try:
+                mensaje = asistente.completar_autorizacion(params)
+                self._redirigir("/?google=ok&mensaje=" + quote(mensaje))
+            except asistente.ErrorAsistente as exc:
+                self._redirigir("/?google=error&mensaje=" + quote(str(exc)))
+            return
+        if ruta == "/api/setup/plantilla-clientes.xlsx":
+            cuerpo = asistente.plantilla_clientes()
+            self.send_response(200)
+            self.send_header("Content-Type", "application/vnd.openxmlformats-"
+                             "officedocument.spreadsheetml.sheet")
+            self.send_header("Content-Disposition",
+                             'attachment; filename="plantilla_clientes.xlsx"')
+            self.send_header("Content-Length", str(len(cuerpo)))
+            self.end_headers()
+            self.wfile.write(cuerpo)
+            return
+        if ruta.startswith("/api/setup/"):
+            try:
+                self._json(*_setup_get(ruta))
+            except asistente.ErrorAsistente as exc:
+                self._json(400, {"ok": False, "mensaje": str(exc)})
+            except Exception as exc:  # noqa: BLE001
+                self._json(500, {"ok": False, "mensaje": f"Error interno: {exc}"})
+            return
         if ruta == "/api/estado":
             self._json(200, construir_estado())
         elif ruta.startswith("/api/hilo/"):
@@ -1182,7 +1262,24 @@ class Manejador(BaseHTTPRequestHandler):
             self._json(404, {"error": f"ruta desconocida {ruta}"})
 
     def do_POST(self) -> None:
-        if urlparse(self.path).path != "/api/accion":
+        ruta = urlparse(self.path).path
+        if ruta.startswith("/api/setup/"):
+            if not self._peticion_local():
+                self._json(403, {"ok": False, "mensaje": "Petición rechazada: "
+                                 "solo se acepta desde el propio panel"})
+                return
+            try:
+                largo = int(self.headers.get("Content-Length", 0))
+                if largo > asistente.MAX_SUBIDA * 2:
+                    raise asistente.ErrorAsistente("El fichero es demasiado grande (máximo 10 MB).")
+                peticion = json.loads(self.rfile.read(largo).decode("utf-8") or "{}")
+                self._json(200, _setup_post(ruta, peticion))
+            except asistente.ErrorAsistente as exc:
+                self._json(400, {"ok": False, "mensaje": str(exc)})
+            except Exception as exc:  # noqa: BLE001 — responder siempre JSON
+                self._json(500, {"ok": False, "mensaje": f"Error interno: {exc}"})
+            return
+        if ruta != "/api/accion":
             self._json(404, {"error": "ruta desconocida"})
             return
         try:

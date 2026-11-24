@@ -221,15 +221,24 @@ def fila_a_cliente(num: int, fila: dict) -> dict:
 
 # ── Proceso principal ───────────────────────────────────────────
 
-def main() -> int:
-    fich = localizar_fichero()
+def main(fich: Path | None = None) -> int:
+    """Importa `fich` (lo usa el asistente del panel) o, si no se
+    indica, el fichero más reciente de entrada/."""
+    fich = fich or localizar_fichero()
     if not fich:
         print("[i] No hay ficheros pendientes en entrada/")
         return 0
+    if not fich.is_file():
+        print(f"[ERROR] No existe el fichero {fich}")
+        return 1
     print(f"[i] Importando: {fich.name}")
 
-    filas = leer_filas(fich)
-    idx = detectar_cabecera(filas)
+    try:
+        filas = leer_filas(fich)
+        idx = detectar_cabecera(filas)
+    except Exception as exc:  # noqa: BLE001 — fichero ilegible o sin cabecera
+        print(f"[ERROR] {exc}. No se importa nada.")
+        return 1
     colmap = columnas_con_datos(filas, idx)
     print(f"[i] Cabecera en fila {idx+1}: columnas {colmap}")
     faltantes = [k for k in ("nombre", "email", "telefono") if colmap[k] == -1]
@@ -332,4 +341,4 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(main(Path(sys.argv[1]) if len(sys.argv) > 1 else None))
