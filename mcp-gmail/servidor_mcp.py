@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
-"""servidor_mcp.py — MCP de Gmail (SOLO lectura + borradores).
+"""servidor_mcp.py — MCP de Gmail (lectura + borradores) y Google Calendar.
 
 Regla de oro del proyecto: este servidor NUNCA envía correos.
 No existe ninguna llamada a endpoints de envío en este código —
-las únicas operaciones son leer (readonly) y crear/listar
-borradores (compose). El usuario revisa y envía desde Gmail.
+en Gmail las únicas operaciones son leer (readonly) y crear/listar/
+actualizar borradores (compose). El usuario revisa y envía desde Gmail.
+En Calendar solo toca el calendario del asesor, sin invitados.
 
 Herramientas MCP expuestas:
+  Gmail
   gmail_list_unread(max)          — correos no leídos recientes
   gmail_search(consulta, max)     — búsqueda con sintaxis de Gmail
   gmail_get_thread(thread_id)     — hilo completo (contexto)
@@ -14,6 +16,13 @@ Herramientas MCP expuestas:
   gmail_list_drafts(max)          — borradores pendientes
   gmail_create_draft(para, asunto, cuerpo)            — borrador nuevo
   gmail_create_draft_reply(thread_id, cuerpo, ...)    — borrador EN el hilo
+  gmail_update_draft(draft_id, para, asunto, cuerpo)  — sustituye un borrador
+
+  Google Calendar
+  calendar_list_events(desde, hasta, max)             — eventos entre fechas
+  calendar_create_event(titulo, fecha, hora, ...)     — cita nueva, sin invitados
+  calendar_update_event(event_id, ...)                — reprogramar / editar
+  calendar_delete_event(event_id)                     — cancelar una cita
 
 Uso (lo configura el cliente IA):
   .venv\\Scripts\\python.exe mcp-gmail\\servidor_mcp.py   (transporte stdio)
@@ -31,6 +40,7 @@ from google.oauth2.credentials import Credentials
 from googleapiclient.discovery import build
 
 from mcp.server.fastmcp import FastMCP
+from mcp.types import ToolAnnotations
 
 RAIZ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ / "scripts"))
@@ -43,6 +53,21 @@ TOKEN = CARPETA / "token.json"
 SCOPES = gcal_mod.SCOPES  # gmail.readonly + gmail.compose + calendar.events
 
 mcp = FastMCP("gmail-calendar")
+
+# ── Anotaciones MCP ─────────────────────────────────────────────
+# Pistas (hints) que el cliente IA lee al listar las herramientas:
+# le dicen si una herramienta solo lee, si puede sobrescribir o borrar
+# datos y si repetirla tiene el mismo efecto, para que decida cuándo
+# pedir confirmación al usuario. No cambian el comportamiento del
+# servidor. openWorldHint=True en todas porque hablan con Google.
+SOLO_LECTURA = ToolAnnotations(readOnlyHint=True, destructiveHint=False,
+                               idempotentHint=True, openWorldHint=True)
+CREA = ToolAnnotations(readOnlyHint=False, destructiveHint=False,
+                       idempotentHint=False, openWorldHint=True)
+SOBRESCRIBE = ToolAnnotations(readOnlyHint=False, destructiveHint=True,
+                              idempotentHint=True, openWorldHint=True)
+ELIMINA = ToolAnnotations(readOnlyHint=False, destructiveHint=True,
+                          idempotentHint=True, openWorldHint=True)
 
 
 # ── Servicio Gmail ──────────────────────────────────────────────
@@ -136,7 +161,7 @@ def _texto_mensaje(mensaje: dict) -> str:
 
 # ── Herramientas MCP ────────────────────────────────────────────
 
-@mcp.tool()
+@mcp.tool(annotations=SOLO_LECTURA)
 def gmail_list_unread(max: int = 15) -> str:
     """Lista los correos NO leídos recientes del buzón (los más nuevos primero)."""
     servicio = _servicio()
@@ -156,7 +181,7 @@ def gmail_list_unread(max: int = 15) -> str:
                        "mensajes": salida}, ensure_ascii=False, indent=1)
 
 
-@mcp.tool()
+@mcp.tool(annotations=SOLO_LECTURA)
 def gmail_search(consulta: str, max: int = 15) -> str:
     """Busca correos con la sintaxis de Gmail. Ejemplos:
     'from:laruiz@gmail.com', 'presupuesto Cortes Valencianas',
@@ -176,7 +201,7 @@ def gmail_search(consulta: str, max: int = 15) -> str:
                        "mensajes": salida}, ensure_ascii=False, indent=1)
 
 
-@mcp.tool()
+@mcp.tool(annotations=SOLO_LECTURA)
 def gmail_get_thread(thread_id: str) -> str:
     """Devuelve un hilo COMPLETO con todos sus mensajes en orden,
     incluyendo el cuerpo de texto de cada uno (para responder con contexto)."""
@@ -196,7 +221,7 @@ def gmail_get_thread(thread_id: str) -> str:
                        "mensajes": salida}, ensure_ascii=False, indent=1)
 
 
-@mcp.tool()
+@mcp.tool(annotations=SOLO_LECTURA)
 def gmail_get_message(message_id: str) -> str:
     """Devuelve un mensaje concreto con su cuerpo completo."""
     servicio = _servicio()
@@ -210,7 +235,7 @@ def gmail_get_message(message_id: str) -> str:
     return json.dumps(salida, ensure_ascii=False, indent=1)
 
 
-@mcp.tool()
+@mcp.tool(annotations=SOLO_LECTURA)
 def gmail_list_drafts(max: int = 15) -> str:
     """Lista los borradores existentes (pendientes de revisión y envío por el usuario)."""
     servicio = _servicio()
@@ -250,7 +275,7 @@ def _raw_para_draft(cuerpo: str, para: str, asunto: str,
     return base64.urlsafe_b64encode(email.as_bytes()).decode()
 
 
-@mcp.tool()
+@mcp.tool(annotations=CREA)
 def gmail_create_draft(para: str, asunto: str, cuerpo: str,
                        thread_id: str | None = None) -> str:
     """Crea un BORRADOR nuevo (no se envía). Si le pasas thread_id,
@@ -270,7 +295,7 @@ def gmail_create_draft(para: str, asunto: str, cuerpo: str,
                       ensure_ascii=False, indent=1)
 
 
-@mcp.tool()
+@mcp.tool(annotations=CREA)
 def gmail_create_draft_reply(thread_id: str, cuerpo: str,
                              message_id: str | None = None) -> str:
     """Crea un borrador de RESPUESTA dentro de un hilo existente.
@@ -313,7 +338,7 @@ def gmail_create_draft_reply(thread_id: str, cuerpo: str,
                       ensure_ascii=False, indent=1)
 
 
-@mcp.tool()
+@mcp.tool(annotations=SOBRESCRIBE)
 def gmail_update_draft(draft_id: str, para: str, asunto: str, cuerpo: str,
                        thread_id: str | None = None) -> str:
     """SUSTITUYE el contenido de un borrador existente (draft_id).
@@ -331,7 +356,7 @@ def gmail_update_draft(draft_id: str, para: str, asunto: str, cuerpo: str,
                       ensure_ascii=False, indent=1)
 
 
-@mcp.tool()
+@mcp.tool(annotations=CREA)
 def calendar_create_event(titulo: str, fecha: str, hora: str,
                           duracion_min: int = 60, ubicacion: str | None = None,
                           descripcion: str | None = None) -> str:
@@ -355,7 +380,7 @@ def calendar_create_event(titulo: str, fecha: str, hora: str,
                       ensure_ascii=False, indent=1)
 
 
-@mcp.tool()
+@mcp.tool(annotations=SOLO_LECTURA)
 def calendar_list_events(desde: str, hasta: str, max: int = 25) -> str:
     """Lista eventos del calendario del asesor entre dos fechas
     ('AAAA-MM-DD', inclusivas). Sirve para responder '¿qué tengo
@@ -378,7 +403,7 @@ def calendar_list_events(desde: str, hasta: str, max: int = 25) -> str:
                       ensure_ascii=False, indent=1)
 
 
-@mcp.tool()
+@mcp.tool(annotations=SOBRESCRIBE)
 def calendar_update_event(event_id: str, titulo: str | None = None,
                           fecha: str | None = None, hora: str | None = None,
                           duracion_min: int | None = None,
@@ -399,9 +424,14 @@ def calendar_update_event(event_id: str, titulo: str | None = None,
         hora_nueva = hora or hora_vieja
         dur = duracion_min
         if not dur:
+            # conservar la duración ORIGINAL (fin viejo − inicio viejo);
+            # % 1440 por si la cita cruzaba la medianoche
             fin_viejo = evento["end"].get("dateTime", "")
-            dur = ((int(fin_viejo[11:13]) * 60 + int(fin_viejo[14:16]))
-                   - (int(hora_nueva[:2]) * 60 + int(hora_nueva[3:5]))) or 60
+            hora_fin_vieja = fin_viejo.split("T")[1][:5] if "T" in fin_viejo else None
+            if hora_fin_vieja:
+                dur = ((int(hora_fin_vieja[:2]) * 60 + int(hora_fin_vieja[3:5]))
+                       - (int(hora_vieja[:2]) * 60 + int(hora_vieja[3:5]))) % 1440
+            dur = dur or 60
         evento["start"]["dateTime"] = f"{fecha}T{hora_nueva}:00"
         evento["end"]["dateTime"] = f"{fecha}T{gcal_mod.fin_de_cita(hora_nueva, dur)}:00"
         evento["start"]["timeZone"] = gcal_mod.ZONA_HORARIA
@@ -416,7 +446,7 @@ def calendar_update_event(event_id: str, titulo: str | None = None,
                       ensure_ascii=False, indent=1)
 
 
-@mcp.tool()
+@mcp.tool(annotations=ELIMINA)
 def calendar_delete_event(event_id: str) -> str:
     """Cancela (elimina) un evento del calendario del asesor."""
     servicio = _servicio_calendar()

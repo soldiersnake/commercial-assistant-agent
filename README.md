@@ -1,5 +1,7 @@
 # Commercial Assistant Agent — Gestor comercial con agente de IA
 
+[![M8ven Score](https://m8ven.ai/badge/mcp/soldiersnake/commercial-assistant-agent)](https://m8ven.ai/mcp/soldiersnake/commercial-assistant-agent?s=readme)
+
 **Agente de IA que gestiona el día a día de un asesor comercial: lee el correo, clasifica cada entrante, prepara borradores de respuesta, hace seguimiento de presupuestos, captaciones y citas — y nunca envía un mail solo.**
 
 > 🧭 *"Agente asistente* (agéntico) que se conecta a tu Gmail y a tu calendario mediante MCP, decide qué hacer con cada correo y te deja todo listo para revisar: borradores, seguimientos, avisos y un panel de gestión local.*
