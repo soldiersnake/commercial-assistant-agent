@@ -1758,15 +1758,16 @@ function asisIA(){
       ${fila(ia.gemini_configurado, "<b>Gemini</b> conectado a tu Gmail y calendario",
         `<button class="acc primary" style="margin-top:6px" onclick="crearConfigGemini(this)">Configurarlo ahora</button>`)}
     </ul>
-    ${ia.gemini && ia.gemini_configurado ? `<div class="caja info">Último paso: la primera vez, abre
-      <b>Asistente.bat</b> o escribe <code>gemini</code> en la carpeta del programa e inicia sesión con tu
-      cuenta de Google cuando te lo pida.</div>` : ""}
+    ${ia.gemini && ia.gemini_configurado ? `<div class="caja info">Último paso: la primera vez, abre un
+      «Símbolo del sistema» en la carpeta del programa, escribe <code>gemini</code> y pulsa Intro; inicia
+      sesión con tu cuenta de Google cuando te lo pida. (Ojo: <b>Asistente.bat</b> abre OpenCode, no Gemini.)</div>` : ""}
     <details class="mas"><summary>Alternativa: OpenCode</summary>
       <ul class="lista-estado">
         ${fila(ia.opencode, "<b>OpenCode</b> instalado",
           `<pre class="cmd" onclick="copiar(this.textContent)">npm install -g opencode-ai</pre>`)}
         ${fila(ia.opencode_configurado, "Configuración del proyecto (<code>opencode.json</code>)")}
       </ul>
+      <p class="nota">Con OpenCode, <b>Asistente.bat</b> abre el asistente en modo conversación.</p>
       <p class="nota">Detalles en la guía <code>docs/CONFIGURACION.md</code>, paso 1.</p>
     </details>
     <div style="margin-top:14px"><button class="btn" onclick="recomprobarIA(this)">🔄 Volver a comprobar</button></div>`;
