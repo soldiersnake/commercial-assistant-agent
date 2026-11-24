@@ -386,10 +386,17 @@ def calendar_list_events(desde: str, hasta: str, max: int = 25) -> str:
     ('AAAA-MM-DD', inclusivas). Sirve para responder '¿qué tengo
     mañana?'. Devuelve los que el sistema conoce de él, incluidas
     las que creó a mano en Google."""
+    # offset real de la zona horaria en cada fecha (+01:00 en invierno,
+    # +02:00 en verano), no uno fijo
+    from datetime import datetime
+    from zoneinfo import ZoneInfo
+    tz = ZoneInfo(gcal_mod.ZONA_HORARIA)
+    time_min = datetime.fromisoformat(f"{desde}T00:00:00").replace(tzinfo=tz)
+    time_max = datetime.fromisoformat(f"{hasta}T23:59:59").replace(tzinfo=tz)
     servicio = _servicio_calendar()
     res = servicio.events().list(
-        calendarId="primary", timeMin=f"{desde}T00:00:00+02:00",
-        timeMax=f"{hasta}T23:59:59+02:00", singleEvents=True,
+        calendarId="primary", timeMin=time_min.isoformat(),
+        timeMax=time_max.isoformat(), singleEvents=True,
         orderBy="startTime", maxResults=min(max, 50)).execute()
     salida = [{"id": e["id"], "titulo": e.get("summary", "(sin título)"),
                "inicio": e.get("start", {}).get("dateTime",
@@ -409,17 +416,23 @@ def calendar_update_event(event_id: str, titulo: str | None = None,
                           duracion_min: int | None = None,
                           ubicacion: str | None = None,
                           descripcion: str | None = None) -> str:
-    """Actualiza un evento (reprogramación: pasar fecha y/o hora;
-    también título, ubicación, duración)."""
+    """Actualiza un evento (reprogramación: pasar fecha y/o hora —
+    con solo la hora se mantiene el día —; también título, ubicación,
+    duración). Sin duracion_min se conserva la duración original."""
     servicio = _servicio_calendar()
     evento = servicio.events().get(calendarId="primary",
                                    eventId=event_id).execute()
     if titulo:
         evento["summary"] = titulo
-    if fecha:
+    if fecha or hora:
         evento.setdefault("start", {})
         evento.setdefault("end", {})
-        inicio_viejo = evento["start"].get("dateTime", f"{fecha}T09:00:00")
+        inicio_viejo = evento["start"].get("dateTime", "")
+        # solo hora → se mantiene el día que tenía la cita
+        fecha = fecha or inicio_viejo[:10] or evento["start"].get("date", "")
+        if not fecha:
+            return json.dumps({"ok": False, "error": "el evento no tiene fecha: "
+                               "indica también 'fecha'"}, ensure_ascii=False)
         hora_vieja = inicio_viejo.split("T")[1][:5] if "T" in inicio_viejo else "09:00"
         hora_nueva = hora or hora_vieja
         dur = duracion_min
@@ -432,6 +445,9 @@ def calendar_update_event(event_id: str, titulo: str | None = None,
                 dur = ((int(hora_fin_vieja[:2]) * 60 + int(hora_fin_vieja[3:5]))
                        - (int(hora_vieja[:2]) * 60 + int(hora_vieja[3:5]))) % 1440
             dur = dur or 60
+        # si era de día completo deja de serlo (Google no admite date + dateTime)
+        evento["start"].pop("date", None)
+        evento["end"].pop("date", None)
         evento["start"]["dateTime"] = f"{fecha}T{hora_nueva}:00"
         evento["end"]["dateTime"] = f"{fecha}T{gcal_mod.fin_de_cita(hora_nueva, dur)}:00"
         evento["start"]["timeZone"] = gcal_mod.ZONA_HORARIA

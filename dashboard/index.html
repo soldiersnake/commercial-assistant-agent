@@ -111,6 +111,111 @@
   .v-auto{background:#e3f0fd; color:#1d5480}
   .v-manual{background:#e8f5e9; color:var(--verde)}
   .vacío{text-align:center; padding:30px; color:#78909c}
+  /* ── Asistente de primer uso (Fase 7) ── */
+  .aviso-modo{display:flex; align-items:center; gap:12px; flex-wrap:wrap; padding:10px 22px;
+              font-size:13px; border-bottom:1px solid var(--borde)}
+  .aviso-modo.demo{background:#fff8e1; color:#6d5300}
+  .aviso-modo.pendiente{background:#e3f0fd; color:#1d5480}
+  .aviso-modo b{font-weight:600}
+  .aviso-modo button{margin-left:auto}
+  .asis-fondo{position:fixed; inset:0; background:var(--fondo); overflow:auto; z-index:40}
+  .asis-cab{background:var(--azul); color:#fff; padding:14px 22px; display:flex; align-items:center; gap:12px}
+  .asis-cab h1{font-size:19px; font-weight:600}
+  .asis-cab .cerrar{margin-left:auto; background:transparent; color:#fff; border:1px solid rgba(255,255,255,.5);
+                    border-radius:6px; padding:5px 12px; cursor:pointer; font-size:13px}
+  .asis-cab .cerrar:hover{background:rgba(255,255,255,.12)}
+  .asis-cuerpo{max-width:980px; margin:0 auto; padding:24px 22px 60px; display:grid;
+               grid-template-columns:220px 1fr; gap:24px; align-items:start}
+  .pasos{list-style:none; padding:0; position:sticky; top:16px}
+  .pasos li{display:flex; gap:10px; align-items:center; padding:10px 12px; border-radius:8px;
+            cursor:pointer; color:#45596b; margin-bottom:4px}
+  .pasos li:hover{background:#e8eef4}
+  .pasos li.actual{background:#fff; color:var(--azul); font-weight:600; box-shadow:0 1px 3px rgba(0,0,0,.08)}
+  .pasos .num{width:26px; height:26px; border-radius:50%; display:grid; place-items:center; flex:none;
+              font-size:12px; font-weight:700; border:2px solid var(--gris); color:var(--gris); background:#fff}
+  .pasos li.actual .num{border-color:var(--azul); color:var(--azul)}
+  .pasos li.hecho .num{background:var(--verde); border-color:var(--verde); color:#fff}
+  .pasos .opc{display:block; font-size:10px; font-weight:400; color:#90a4ae; text-transform:uppercase; letter-spacing:.4px}
+  .asis-panel{background:#fff; border:1px solid var(--borde); border-radius:10px; padding:24px 28px;
+              box-shadow:0 1px 3px rgba(0,0,0,.06)}
+  .asis-panel h2{font-size:20px; color:var(--azul); margin-bottom:6px}
+  .asis-panel .intro{color:#45596b; margin-bottom:18px; line-height:1.5}
+  .asis-panel h3{font-size:15px; color:#22313f; margin:22px 0 10px}
+  .asis-pie{display:flex; justify-content:space-between; gap:8px; margin-top:26px;
+            padding-top:16px; border-top:1px solid var(--borde)}
+  .btn{border:1px solid var(--borde); background:#fff; border-radius:8px; padding:9px 18px;
+       cursor:pointer; font-size:14px; font-family:inherit; color:#22313f}
+  .btn:hover{border-color:var(--azul2)}
+  .btn.prim{background:var(--azul); border-color:var(--azul); color:#fff; font-weight:600}
+  .btn.prim:hover{background:var(--azul2)}
+  .btn:disabled{opacity:.5; cursor:not-allowed}
+  .btn.google{display:inline-flex; align-items:center; gap:10px; font-weight:600; padding:11px 20px}
+  .guia{counter-reset:guia; margin:0; padding:0; list-style:none}
+  .guia>li{position:relative; border:1px solid var(--borde); border-radius:8px; padding:14px 16px 14px 56px;
+           margin-bottom:10px; line-height:1.55}
+  .guia>li::before{counter-increment:guia; content:counter(guia); position:absolute; left:14px; top:13px;
+                   width:28px; height:28px; border-radius:50%; background:#e3f0fd; color:var(--azul);
+                   display:grid; place-items:center; font-weight:700; font-size:13px}
+  .guia>li.marcado{background:#f3faf3; border-color:#c8e6c9}
+  .guia>li.marcado::before{content:"✓"; background:var(--verde); color:#fff}
+  .guia b.t{display:block; font-size:14px; margin-bottom:2px}
+  .guia .acciones{display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; align-items:center}
+  .guia a.ir{display:inline-block; background:var(--azul); color:#fff; text-decoration:none; border-radius:6px;
+             padding:5px 12px; font-size:12px; font-weight:600}
+  .guia a.ir:hover{background:var(--azul2)}
+  .guia label.hecho{font-size:12px; color:#607080; display:flex; gap:5px; align-items:center; cursor:pointer; margin-left:auto}
+  .clic{background:#eef2f6; border:1px solid #cfd8e1; border-radius:4px; padding:0 5px; font-size:12.5px;
+        font-weight:600; white-space:nowrap}
+  .copiar{border:1px dashed var(--azul2); background:#f5f9fd; color:var(--azul); border-radius:4px;
+          padding:0 6px; font-family:Consolas,monospace; font-size:12.5px; cursor:pointer}
+  .copiar:hover{background:#e3f0fd}
+  .caja{border-radius:8px; padding:12px 14px; margin:12px 0; line-height:1.5; font-size:13px}
+  .caja.info{background:#e3f0fd; color:#1d5480}
+  .caja.aviso{background:#fff8e1; color:#6d5300; border:1px solid #f3e0a0}
+  .caja.ok{background:#e8f5e9; color:#1b5e20; border:1px solid #c8e6c9}
+  .caja.error{background:#fdecea; color:var(--rojo); border:1px solid #f5c6c2}
+  .soltar{border:2px dashed #b0bec5; border-radius:10px; padding:26px; text-align:center; cursor:pointer;
+          color:#607080; background:#fafbfc; transition:.15s}
+  .soltar:hover, .soltar.encima{border-color:var(--azul2); background:#eef4fa; color:var(--azul)}
+  .soltar .grande{font-size:26px; display:block; margin-bottom:4px}
+  .form-rejilla{display:grid; grid-template-columns:1fr 1fr; gap:4px 16px}
+  .form-rejilla .ancho{grid-column:1 / -1}
+  .asis-panel label.campo{display:block; font-size:12px; color:#607080; margin:10px 0 4px; font-weight:600}
+  .asis-panel input[type=text], .asis-panel input[type=email]{width:100%; padding:9px 11px; border:1px solid var(--borde);
+        border-radius:6px; font-size:14px; font-family:inherit}
+  .asis-panel input:focus{outline:2px solid #bcd6ef; border-color:var(--azul2)}
+  .contactos td{border:none; padding:3px 4px 3px 0}
+  .contactos input{font-size:13px !important; padding:6px 8px !important}
+  .lista-estado{list-style:none; padding:0}
+  .lista-estado li{display:flex; gap:10px; align-items:flex-start; padding:9px 0; border-bottom:1px dashed var(--borde)}
+  .lista-estado .ic{width:22px; flex:none; text-align:center}
+  pre.cmd{background:#22313f; color:#e8f1f8; padding:10px 12px; border-radius:6px; font-size:12.5px;
+          margin:6px 0; white-space:pre-wrap; cursor:pointer; position:relative}
+  pre.cmd::after{content:"copiar"; position:absolute; right:8px; top:8px; font-size:10px; color:#90a4ae;
+                 font-family:"Segoe UI",sans-serif}
+  .bienvenida{max-width:860px; margin:0 auto; padding:56px 22px}
+  .bienvenida h2{font-size:28px; color:var(--azul); margin-bottom:8px}
+  .bienvenida .intro{font-size:15px; color:#45596b; margin-bottom:28px; line-height:1.5}
+  .caminos{display:grid; grid-template-columns:1fr 1fr; gap:18px}
+  .camino{background:#fff; border:2px solid var(--borde); border-radius:12px; padding:24px; cursor:pointer;
+          text-align:left; font-family:inherit; color:inherit; transition:.15s; display:flex; flex-direction:column}
+  .camino:hover{border-color:var(--azul2); box-shadow:0 6px 20px rgba(31,78,120,.12); transform:translateY(-1px)}
+  .camino .ico{font-size:30px}
+  .camino h3{font-size:17px; color:var(--azul); margin:10px 0 6px}
+  .camino p{color:#45596b; line-height:1.5; font-size:13.5px; flex:1}
+  .camino .cta{margin-top:16px; font-weight:600; color:var(--azul)}
+  .camino.principal{border-color:var(--azul)}
+  .resumen-num{display:flex; gap:10px; flex-wrap:wrap; margin:10px 0}
+  .resumen-num div{border:1px solid var(--borde); border-radius:8px; padding:8px 14px; text-align:center; min-width:100px}
+  .resumen-num b{display:block; font-size:20px}
+  .resumen-num span{font-size:11px; color:#607080; text-transform:uppercase}
+  details.mas summary{cursor:pointer; color:var(--azul2); font-size:13px; margin:8px 0}
+  @media (max-width:760px){
+    .asis-cuerpo{grid-template-columns:1fr}
+    .pasos{position:static; display:flex; overflow-x:auto; gap:4px}
+    .pasos li{flex:none}
+    .caminos, .form-rejilla{grid-template-columns:1fr}
+  }
 </style>
 </head>
 <body>
@@ -120,8 +225,10 @@
   <div style="position:absolute; top:12px; right:22px; display:flex; gap:8px">
     <button class="acc" id="btn-procesar" onclick="botonProcesar()" title="Lanza el proceso diario completo: mails, borradores, citas y datos">⚡ Procesar ahora</button>
     <button class="acc" id="btn-importar" onclick="botonImportar()" title="Importa el Excel de clientes depositado en la carpeta entrada/">📥 Importar clientes</button>
+    <button class="acc" id="btn-config" onclick="abrirConfiguracion()" title="Conectar Google, tus datos, tus clientes y el asistente de IA">⚙️ Configuración</button>
   </div>
 </header>
+<div id="aviso-modo" class="oculto"></div>
 
 <div class="metricas" id="metricas"></div>
 
@@ -136,6 +243,7 @@
 
 <div class="contenedor" id="contenido"></div>
 <div id="modal-raiz"></div>
+<div id="asistente" class="oculto"></div>
 <div id="toast" class="oculto"></div>
 
 <script>
@@ -1220,7 +1328,489 @@ function renderCliTbody(){
 
 document.addEventListener("keydown", e => { if(e.key === "Escape") cerrarModal(); });
 
-cargar().catch(err => {
+/* ══ Asistente de primer uso (Fase 7) ══════════════════════════
+   Bienvenida (demo o datos propios) + asistente en 4 pasos:
+   Google · Tus datos · Clientes · IA. Backend: dashboard/asistente.py */
+let SETUP = null;
+let PASO_ASIS = "google";
+let VER_GUIA = null;          // null = automático (abierta si no hay credencial)
+let ERROR_GOOGLE = null;      // último error de la vuelta de Google (se queda a la vista)
+const PASOS_ASIS = [
+  ["google", "Conectar Google", false],
+  ["datos", "Tus datos", false],
+  ["clientes", "Tus clientes", true],
+  ["ia", "Asistente de IA", true],
+];
+const GUIA_HECHOS = new Set(JSON.parse(lsLeer("guia-google") || "[]"));
+
+function lsLeer(k){ try { return localStorage.getItem("asis-" + k); } catch(e){ return null; } }
+function lsGuardar(k, v){ try { localStorage.setItem("asis-" + k, v); } catch(e){} }
+
+async function cargarSetup(){
+  const r = await fetch("/api/setup/estado");
+  SETUP = await r.json();
+  return SETUP;
+}
+async function setupPost(ruta, payload){
+  const r = await fetch("/api/setup/" + ruta, {
+    method: "POST", headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(payload || {}),
+  });
+  const resp = await r.json();
+  if (resp.setup) SETUP = resp.setup;
+  return resp;
+}
+function pasoHecho(id){
+  if (!SETUP) return false;
+  return {google: SETUP.google.conectado, datos: SETUP.datos.hecho,
+          clientes: SETUP.clientes.hecho, ia: SETUP.ia.listo}[id];
+}
+
+/* ── Franja bajo la cabecera: modo demo / configuración pendiente ── */
+function renderAvisoModo(){
+  const el = document.getElementById("aviso-modo");
+  if (!SETUP){ el.className = "oculto"; return; }
+  if (SETUP.modo === "demo"){
+    el.className = "aviso-modo demo";
+    el.innerHTML = `🧪 <span>Estás viendo <b>datos de ejemplo</b> (ficticios). Nada de esto está conectado a un correo real.</span>
+      <button class="btn prim" onclick="confirmarDatosReales()">Empezar con mis datos →</button>`;
+  } else if (SETUP.modo === "real" && !SETUP.completo){
+    const falta = SETUP.pendientes.map(p => ({google: "conectar tu Gmail y tu calendario",
+                                              datos: "completar tus datos"})[p]).join(" y ");
+    el.className = "aviso-modo pendiente";
+    el.innerHTML = `⚙️ <span>Para que el asistente trabaje te falta <b>${esc(falta)}</b>.</span>
+      <button class="btn prim" onclick="abrirAsistente()">Continuar configuración →</button>`;
+  } else {
+    el.className = "oculto"; el.innerHTML = "";
+  }
+}
+
+/* ── Bienvenida (primer uso) ── */
+function mostrarBienvenida(){
+  const raiz = document.getElementById("asistente");
+  raiz.className = "asis-fondo";
+  raiz.innerHTML = `
+    <div class="asis-cab"><h1>Gestor Comercial</h1></div>
+    <div class="bienvenida">
+      <h2>👋 Te damos la bienvenida</h2>
+      <p class="intro">Este panel lee tu correo, te prepara borradores de respuesta y lleva el
+        seguimiento de tus clientes, presupuestos y citas. <b>Nunca envía nada por ti</b>:
+        tú revisas y envías desde Gmail.<br>¿Cómo quieres empezar?</p>
+      <div class="caminos">
+        <button class="camino" onclick="elegirModo('demo')">
+          <span class="ico">🧪</span>
+          <h3>Probar con datos de ejemplo</h3>
+          <p>Explora el panel con una cartera ficticia. No hace falta conectar ningún correo
+             y puedes tocar todo sin miedo. Cuando quieras, pasas a tus datos.</p>
+          <span class="cta">Ver la demo →</span>
+        </button>
+        <button class="camino principal" onclick="elegirModo('real')">
+          <span class="ico">🚀</span>
+          <h3>Empezar con mis datos</h3>
+          <p>Te guiamos paso a paso: conectar tu Gmail y tu calendario, tus datos de
+             contacto y tu lista de clientes. Unos 15 minutos, una sola vez.</p>
+          <span class="cta">Configurar →</span>
+        </button>
+      </div>
+    </div>`;
+}
+async function elegirModo(modo){
+  const resp = await setupPost("modo", {modo});
+  toast(resp.mensaje ?? "");
+  if (!resp.ok) return;
+  await cargar();
+  if (modo === "real") abrirAsistente(); else cerrarAsistente();
+}
+function confirmarDatosReales(){
+  abrirModal(`<h2>Empezar con tus datos</h2>
+    <p>Los datos de ejemplo se guardarán en <code>datos/archivo/</code> (no se borran)
+       y el panel quedará listo para tus clientes.</p>
+    <p class="nota" style="margin-top:8px">A continuación te guiamos para conectar tu Gmail y tu calendario.</p>
+    <div class="pie"><button class="acc" onclick="cerrarModal()">Cancelar</button>
+      <button class="acc primary" onclick="cerrarModal(); elegirModo('real')">Continuar</button></div>`);
+}
+
+/* ── Asistente ── */
+function abrirAsistente(paso){
+  PASO_ASIS = paso || (SETUP && SETUP.pendientes[0]) || "google";
+  renderAsistente();
+}
+function cerrarAsistente(){
+  const raiz = document.getElementById("asistente");
+  raiz.className = "oculto"; raiz.innerHTML = "";
+  renderAvisoModo();
+}
+function irPaso(id){ PASO_ASIS = id; renderAsistente(); window.scrollTo(0, 0);
+                     document.getElementById("asistente").scrollTop = 0; }
+
+function renderAsistente(){
+  const raiz = document.getElementById("asistente");
+  raiz.className = "asis-fondo";
+  const idx = PASOS_ASIS.findIndex(p => p[0] === PASO_ASIS);
+  const lista = PASOS_ASIS.map(([id, txt, opc], i) => `
+    <li class="${id === PASO_ASIS ? "actual" : ""} ${pasoHecho(id) ? "hecho" : ""}" onclick="irPaso('${id}')">
+      <span class="num">${pasoHecho(id) ? "✓" : i + 1}</span>
+      <span>${esc(txt)}${opc ? '<span class="opc">opcional</span>' : ""}</span></li>`).join("");
+  const vista = ({google: asisGoogle, datos: asisDatos, clientes: asisClientes, ia: asisIA})[PASO_ASIS]();
+  const ultimo = idx === PASOS_ASIS.length - 1;
+  raiz.innerHTML = `
+    <div class="asis-cab"><h1>⚙️ Configuración</h1>
+      <button class="cerrar" onclick="cerrarAsistente()">✕ Cerrar y seguir luego</button></div>
+    <div class="asis-cuerpo">
+      <ol class="pasos">${lista}</ol>
+      <div class="asis-panel">${vista}
+        <div class="asis-pie">
+          <button class="btn" onclick="irPaso('${PASOS_ASIS[Math.max(idx - 1, 0)][0]}')" ${idx === 0 ? "disabled" : ""}>← Anterior</button>
+          ${ultimo
+            ? `<button class="btn prim" onclick="cerrarAsistente()">${SETUP.completo ? "✓ Ir al panel" : "Ir al panel"}</button>`
+            : `<button class="btn prim" onclick="irPaso('${PASOS_ASIS[idx + 1][0]}')">Siguiente →</button>`}
+        </div>
+      </div>
+    </div>`;
+  activarZonasSoltar();
+}
+
+/* ── Paso 1: Google ── */
+const URL_CONSOLA = "https://console.cloud.google.com";
+function guiaPaso(n, titulo, cuerpo, enlaces){
+  const hecho = GUIA_HECHOS.has(n);
+  return `<li class="${hecho ? "marcado" : ""}"><b class="t">${titulo}</b>${cuerpo}
+    <div class="acciones">${(enlaces || []).map(([txt, url]) =>
+      `<a class="ir" href="${url}" target="_blank" rel="noopener">${txt} ↗</a>`).join("")}
+      <label class="hecho"><input type="checkbox" ${hecho ? "checked" : ""}
+        onchange="marcarGuia(${n}, this.checked)"> Hecho</label></div></li>`;
+}
+function marcarGuia(n, si){
+  si ? GUIA_HECHOS.add(n) : GUIA_HECHOS.delete(n);
+  lsGuardar("guia-google", JSON.stringify([...GUIA_HECHOS]));
+  renderAsistente();
+}
+function copiar(txt){
+  navigator.clipboard?.writeText(txt).then(() => toast("📋 Copiado: " + txt), () => {});
+}
+function cp(txt){ return `<span class="copiar" title="Clic para copiar" onclick="copiar('${esc(txt)}')">${esc(txt)}</span>`; }
+
+function asisGoogle(){
+  const g = SETUP.google;
+  const verGuia = VER_GUIA ?? !g.credencial;
+  let estado;
+  if (g.conectado){
+    estado = `<div class="caja ok">✅ <b>Conectado${g.email ? " como " + esc(g.email) : ""}.</b>
+        El asistente ya puede leer tu correo, preparar borradores y gestionar tus citas.</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap">
+        <button class="btn" onclick="probarGoogle(this)">🔍 Probar la conexión</button>
+        <button class="btn" onclick="conectarGoogle(this)">Volver a conectar</button></div>`;
+  } else if (g.faltan_permisos.length){
+    estado = `<div class="caja error">⚠️ La conexión no tiene todos los permisos: <b>${esc(g.faltan_permisos.join(", "))}</b>.
+      Vuelve a conectar y, en la pantalla de Google, marca <b>todas</b> las casillas.</div>`;
+  } else {
+    estado = "";
+  }
+  if (ERROR_GOOGLE && !g.conectado)
+    estado = `<div class="caja error">⚠️ <b>No se ha podido conectar.</b> ${esc(ERROR_GOOGLE)}</div>` + estado;
+  return `
+    <h2>Conecta tu Gmail y tu calendario</h2>
+    <p class="intro">Para trabajar con tu correo, Google pide que cada persona cree su propia
+      «llave» de acceso. Es gratis, se hace una sola vez y tu contraseña <b>nunca</b> pasa por
+      este programa: la escribes solo en la web de Google.</p>
+    ${estado}
+    <h3 style="display:flex; align-items:center; gap:10px">A. Crea tu llave en Google Cloud
+      <span class="nota" style="font-weight:400">(unos 10 minutos)</span>
+      <button class="acc" style="margin-left:auto" onclick="VER_GUIA=${!verGuia}; renderAsistente()">
+        ${verGuia ? "Ocultar guía" : "Ver la guía"}</button></h3>
+    ${verGuia ? `
+    <div class="caja info">💡 Ten esta ventana y la de Google una al lado de la otra. Si Google te
+      aparece en inglés, entre paréntesis tienes el nombre del botón en inglés. Marca «Hecho» en cada
+      paso para no perderte: se recuerda aunque cierres el panel.</div>
+    <ol class="guia">
+      ${guiaPaso(1, "Crea un proyecto",
+        `Entra con la cuenta de Google del correo que vas a usar. Ponle de nombre ${cp("Gestor Comercial")}
+         y pulsa <span class="clic">Crear</span> (Create). Espera unos segundos a que aparezca arriba
+         a la izquierda como proyecto seleccionado.`,
+        [["Crear proyecto", URL_CONSOLA + "/projectcreate"]])}
+      ${guiaPaso(2, "Activa Gmail y Google Calendar",
+        `Abre cada enlace y pulsa <span class="clic">Habilitar</span> (Enable). Comprueba arriba que
+         está seleccionado el proyecto «Gestor Comercial».`,
+        [["Activar Gmail API", URL_CONSOLA + "/apis/library/gmail.googleapis.com"],
+         ["Activar Calendar API", URL_CONSOLA + "/apis/library/calendar-json.googleapis.com"]])}
+      ${guiaPaso(3, "Configura la pantalla de permisos",
+        `Pulsa <span class="clic">Comenzar</span> (Get started) y rellena:
+         <br>• Nombre de la aplicación: ${cp("Gestor Comercial")} · Correo de asistencia: el tuyo.
+         <br>• Público (Audience): <span class="clic">Externo</span> (External).
+           Si tu empresa usa Google Workspace y te deja, puedes elegir <span class="clic">Interno</span>.
+         <br>• Datos de contacto: tu correo. Acepta la política y pulsa <span class="clic">Crear</span>.`,
+        [["Abrir Google Auth Platform", URL_CONSOLA + "/auth/overview"]])}
+      ${guiaPaso(4, "Publica la app (¡importante!)",
+        `En <span class="clic">Público</span> (Audience) pulsa <span class="clic">Publicar app</span>
+         (Publish app) y confirma. <div class="caja aviso" style="margin:8px 0 0">Si la dejas en modo
+         «Prueba» (Testing), Google te desconecta <b>cada 7 días</b>. Publicarla no la hace pública:
+         solo tú la usas. Si elegiste «Interno» en el paso anterior, sáltate este paso.</div>`,
+        [["Abrir Público", URL_CONSOLA + "/auth/audience"]])}
+      ${guiaPaso(5, "Crea la llave y descárgala",
+        `Pulsa <span class="clic">Crear cliente</span> (Create client) →
+         Tipo de aplicación: <span class="clic">App de escritorio</span> (Desktop app) →
+         nombre ${cp("Panel")} → <span class="clic">Crear</span>.
+         <div class="caja aviso" style="margin:8px 0 0">En la ventana que aparece pulsa
+         <span class="clic">Descargar JSON</span> (Download JSON). <b>Solo se puede descargar en ese
+         momento</b>; si la cierras, crea otro cliente.</div>`,
+        [["Abrir Clientes", URL_CONSOLA + "/auth/clients"]])}
+    </ol>` : ""}
+    <h3>B. Sube la llave que has descargado</h3>
+    ${g.credencial
+      ? `<div class="caja ok">✅ Llave guardada en este equipo.
+           <a href="#" onclick="document.getElementById('f-cred').click(); return false">Cambiarla</a></div>`
+      : `<div class="soltar" data-subir="credencial" onclick="document.getElementById('f-cred').click()">
+           <span class="grande">🔑</span>Arrastra aquí el fichero <b>client_secret_….json</b>
+           <br><span class="nota">o haz clic para buscarlo (suele estar en Descargas)</span></div>`}
+    <input type="file" id="f-cred" accept=".json,application/json" class="oculto"
+           onchange="subirFichero(this.files[0], 'credencial')">
+    <h3>C. Da permiso a tu cuenta</h3>
+    <p class="nota" style="margin-bottom:10px">Se abrirá la web de Google. Elige tu cuenta y sigue estos pasos:</p>
+    <ul class="lista-estado">
+      <li><span class="ic">1</span><span>Si sale <b>«Google no ha verificado esta aplicación»</b>, es normal (la app es tuya):
+        pulsa <span class="clic">Configuración avanzada</span> (Advanced) →
+        <span class="clic">Ir a Gestor Comercial (no seguro)</span>.</span></li>
+      <li><span class="ic">2</span><span>Marca <b>todas</b> las casillas: ver tus correos, crear borradores y gestionar
+        tu calendario. <b>No se pide permiso para enviar correos.</b></span></li>
+      <li><span class="ic">3</span><span>Pulsa <span class="clic">Continuar</span>: volverás aquí automáticamente.</span></li>
+    </ul>
+    <div style="margin-top:14px">
+      <button class="btn prim google" onclick="conectarGoogle(this)" ${g.credencial ? "" : "disabled"}>
+        <span style="background:#fff; color:#4285f4; border-radius:50%; width:22px; height:22px;
+                     display:grid; place-items:center; font-weight:700">G</span>
+        ${g.conectado ? "Volver a conectar con Google" : "Conectar con Google"}</button>
+      ${g.credencial ? "" : '<span class="nota" style="margin-left:10px">Primero sube tu llave (B).</span>'}
+    </div>`;
+}
+async function conectarGoogle(boton){
+  boton.disabled = true;
+  try {
+    const r = await fetch("/api/setup/google/conectar");
+    const resp = await r.json();
+    if (!resp.ok){ toast(resp.mensaje); boton.disabled = false; return; }
+    window.location.href = resp.url;     // Google vuelve a http://127.0.0.1:8765/
+  } catch(e){ toast("No se pudo iniciar la conexión"); boton.disabled = false; }
+}
+async function probarGoogle(boton){
+  boton.disabled = true; boton.textContent = "⏳ Probando…";
+  const resp = await (await fetch("/api/setup/google/probar")).json();
+  await cargarSetup();
+  renderAsistente();
+  toast((resp.ok ? "✅ " : "⚠️ ") + resp.mensaje);
+}
+
+/* ── Subida de ficheros (arrastrar o elegir) ── */
+function activarZonasSoltar(){
+  document.querySelectorAll(".soltar[data-subir]").forEach(z => {
+    z.ondragover = e => { e.preventDefault(); z.classList.add("encima"); };
+    z.ondragleave = () => z.classList.remove("encima");
+    z.ondrop = e => { e.preventDefault(); z.classList.remove("encima");
+                      if (e.dataTransfer.files[0]) subirFichero(e.dataTransfer.files[0], z.dataset.subir); };
+  });
+}
+function leerBase64(fichero){
+  return new Promise((ok, mal) => {
+    const lector = new FileReader();
+    lector.onload = () => ok(String(lector.result).split(",")[1] || "");
+    lector.onerror = mal;
+    lector.readAsDataURL(fichero);
+  });
+}
+let RESULTADO_CLIENTES = null;
+async function subirFichero(fichero, tipo){
+  if (!fichero) return;
+  const zona = document.querySelector(`.soltar[data-subir="${tipo}"]`);
+  if (zona) zona.innerHTML = `<span class="grande">⏳</span>${tipo === "clientes"
+    ? "Importando tus clientes… (puede tardar un minuto)" : "Comprobando la llave…"}`;
+  try {
+    const contenido_b64 = await leerBase64(fichero);
+    const resp = await setupPost(tipo, {nombre: fichero.name, contenido_b64});
+    if (tipo === "clientes") RESULTADO_CLIENTES = resp;
+    toast((resp.ok ? "✅ " : "⚠️ ") + (resp.mensaje ?? ""));
+    if (resp.ok && tipo === "clientes") await cargar();
+  } catch(e){ toast("⚠️ No se pudo leer el fichero"); }
+  renderAsistente();
+}
+
+/* ── Paso 2: tus datos ── */
+function asisDatos(){
+  const a = SETUP.datos.asesor || {}, e = SETUP.datos.empresa || {};
+  const email = a.email || SETUP.google.email || "";
+  const dominios = (e.dominios || []).join(", ") || (email.includes("@") ? email.split("@")[1] : "");
+  const contactos = (e.contactos_corporativos || []).length ? e.contactos_corporativos
+    : [{}, {}];
+  return `
+    <h2>Tus datos y los de tu empresa</h2>
+    <p class="intro">Se usan para firmar los borradores y para reconocer qué correos vienen de tu
+      propia empresa. Solo se guardan en este equipo.</p>
+    <div class="form-rejilla">
+      <div><label class="campo">Tu nombre y apellidos *</label>
+        <input type="text" id="d-nombre" value="${esc(a.nombre || "")}" placeholder="Ana García López"></div>
+      <div><label class="campo">Tu cargo</label>
+        <input type="text" id="d-cargo" value="${esc(a.cargo || "Asesor comercial")}"></div>
+      <div><label class="campo">Tu email de trabajo</label>
+        <input type="email" id="d-email" value="${esc(email)}" placeholder="ana@miempresa.com"></div>
+      <div><label class="campo">Nombre de tu empresa *</label>
+        <input type="text" id="d-empresa" value="${esc(e.nombre || "")}" placeholder="Mi Empresa S.L."></div>
+      <div class="ancho"><label class="campo">Dominio(s) de correo de tu empresa</label>
+        <input type="text" id="d-dominios" value="${esc(dominios)}" placeholder="miempresa.com">
+        <span class="nota">Lo que va después de la @. Si hay varios, sepáralos con comas.</span></div>
+    </div>
+    <h3>Contactos internos de tu empresa <span class="nota" style="font-weight:400">(opcional)</span></h3>
+    <p class="nota" style="margin-bottom:8px">A quién reenvías lo que no es comercial: averías, facturación,
+      administración… El asistente los incluye cuando prepara una derivación.</p>
+    <table class="contactos" style="box-shadow:none"><tbody id="d-contactos">
+      ${contactos.map(filaContacto).join("")}
+    </tbody></table>
+    <button class="acc" style="margin-top:6px" onclick="anadirFilaContacto()">+ Añadir contacto</button>
+    <div style="margin-top:18px"><button class="btn prim" onclick="guardarDatosAsis(this)">💾 Guardar mis datos</button>
+      ${SETUP.datos.hecho ? '<span class="nota" style="margin-left:10px">✓ Guardados</span>' : ""}</div>`;
+}
+function filaContacto(c){
+  c = c || {};
+  return `<tr>
+    <td><input type="text" data-c="nombre" placeholder="Nombre" value="${esc(c.nombre || "")}"></td>
+    <td><input type="text" data-c="area" placeholder="Área (p. ej. Facturación)" value="${esc(c.area || "")}"></td>
+    <td><input type="email" data-c="email" placeholder="email@empresa.com" value="${esc(c.email || "")}"></td>
+    <td><input type="text" data-c="telefono" placeholder="Teléfono" value="${esc(c.telefono || "")}"></td>
+    <td><button class="acc" title="Quitar" onclick="this.closest('tr').remove()">✕</button></td></tr>`;
+}
+function anadirFilaContacto(){
+  document.getElementById("d-contactos").insertAdjacentHTML("beforeend", filaContacto());
+}
+async function guardarDatosAsis(boton){
+  const v = id => document.getElementById(id).value;
+  const contactos = [...document.querySelectorAll("#d-contactos tr")].map(tr => {
+    const c = {}; tr.querySelectorAll("input[data-c]").forEach(i => c[i.dataset.c] = i.value); return c; });
+  boton.disabled = true;
+  const resp = await setupPost("datos", {
+    asesor: {nombre: v("d-nombre"), cargo: v("d-cargo"), email: v("d-email")},
+    empresa: {nombre: v("d-empresa"), dominios: v("d-dominios"), contactos_corporativos: contactos},
+  });
+  boton.disabled = false;
+  toast((resp.ok ? "✅ " : "⚠️ ") + resp.mensaje);
+  if (resp.ok){ await cargar(); irPaso("clientes"); }
+}
+
+/* ── Paso 3: clientes ── */
+function asisClientes(){
+  const c = SETUP.clientes;
+  const r = RESULTADO_CLIENTES;
+  const inf = (r && r.ok && r.informe) || c.informe;
+  let resultado = "";
+  if (r && !r.ok){
+    resultado = `<div class="caja error">⚠️ ${esc(r.mensaje)}<br><span class="nota">Tus datos no se han tocado.
+      Descarga la plantilla, pega tus clientes en ella y vuelve a probar.</span></div>`;
+  } else if (inf){
+    resultado = `<div class="caja ok">✅ <b>${esc(inf.total_registros)} clientes</b> en tu cartera
+        <span class="nota">(último fichero: ${esc(inf.fichero || "")})</span>
+      <div class="resumen-num">
+        <div><b>${esc(inf.con_email)}</b><span>con email</span></div>
+        <div><b>${esc(inf.con_telefono)}</b><span>con teléfono</span></div>
+        <div><b>${esc(inf.sin_email)}</b><span>sin email</span></div>
+        <div><b>${esc(inf.duplicados)}</b><span>posibles duplicados</span></div></div>
+      ${inf.duplicados ? '<span class="nota">Los duplicados los revisas luego en la pestaña «Vinculaciones».</span>' : ""}
+      ${r && r.aviso_excel ? `<div class="caja aviso">${esc(r.aviso_excel)}</div>` : ""}</div>`;
+  }
+  return `
+    <h2>Tu lista de clientes</h2>
+    <p class="intro">Con tu cartera cargada, el asistente reconoce quién te escribe y te prepara
+      el seguimiento. Puedes hacerlo ahora o más tarde (botón «📥 Importar clientes» del panel).</p>
+    <h3>1. Prepara el Excel</h3>
+    <p>Usa la plantilla: una fila por cliente con las columnas
+      <span class="clic">CÓD</span> <span class="clic">NOMBRE</span> <span class="clic">DOMICILIO</span>
+      <span class="clic">POBLACIÓN</span> <span class="clic">E-MAIL</span> <span class="clic">TELÉFONO</span>.
+      Si un cliente tiene varios emails o teléfonos, sepáralos con «;».</p>
+    <div style="margin:10px 0 4px"><a class="btn" href="/api/setup/plantilla-clientes.xlsx" download
+      style="text-decoration:none; display:inline-block">⬇️ Descargar plantilla Excel</a></div>
+    <h3>2. Súbelo</h3>
+    ${c.hecho ? `<div class="caja aviso">Ya tienes una cartera cargada. Si subes otro fichero
+      <b>la sustituye</b> (la anterior se guarda en <code>datos/archivo/</code>).</div>` : ""}
+    <div class="soltar" data-subir="clientes" onclick="document.getElementById('f-cli').click()">
+      <span class="grande">📊</span>Arrastra aquí tu Excel (.xlsx, .xls) o .csv
+      <br><span class="nota">o haz clic para buscarlo</span></div>
+    <input type="file" id="f-cli" accept=".xlsx,.xls,.csv" class="oculto"
+           onchange="subirFichero(this.files[0], 'clientes')">
+    ${resultado}`;
+}
+
+/* ── Paso 4: IA ── */
+function asisIA(){
+  const ia = SETUP.ia;
+  const fila = (ok, txt, extra) => `<li><span class="ic">${ok ? "✅" : "⬜"}</span>
+    <span>${txt}${extra && !ok ? `<div>${extra}</div>` : ""}</span></li>`;
+  return `
+    <h2>El asistente de IA</h2>
+    <p class="intro">El «cerebro» que lee tus correos y redacta los borradores es un programa
+      aparte (gratis) que se instala una vez. El panel funciona sin él, pero sin él no se procesan
+      correos automáticamente.</p>
+    ${ia.listo ? `<div class="caja ok">✅ <b>Todo listo.</b> Puedes cerrar la configuración y pulsar
+      «⚡ Procesar ahora» en el panel.</div>` : ""}
+    <h3>Opción recomendada: Gemini CLI <span class="nota" style="font-weight:400">(solo tu cuenta de Google, sin tarjeta)</span></h3>
+    <ul class="lista-estado">
+      ${fila(ia.node, "<b>Node.js</b> instalado",
+        `<span class="nota">Descárgalo de <a href="https://nodejs.org" target="_blank" rel="noopener">nodejs.org</a>
+         (botón «LTS») e instálalo con las opciones por defecto. Después cierra y vuelve a abrir el panel.</span>`)}
+      ${fila(ia.gemini, "<b>Gemini CLI</b> instalado",
+        `<span class="nota">Abre «Símbolo del sistema» (tecla Windows → escribe <i>cmd</i>), pega esto y pulsa Intro
+         (clic en el recuadro para copiarlo):</span>
+         <pre class="cmd" onclick="copiar(this.textContent)">npm install -g @google/gemini-cli</pre>`)}
+      ${fila(ia.gemini_configurado, "<b>Gemini</b> conectado a tu Gmail y calendario",
+        `<button class="acc primary" style="margin-top:6px" onclick="crearConfigGemini(this)">Configurarlo ahora</button>`)}
+    </ul>
+    ${ia.gemini && ia.gemini_configurado ? `<div class="caja info">Último paso: la primera vez, abre
+      <b>Asistente.bat</b> o escribe <code>gemini</code> en la carpeta del programa e inicia sesión con tu
+      cuenta de Google cuando te lo pida.</div>` : ""}
+    <details class="mas"><summary>Alternativa: OpenCode</summary>
+      <ul class="lista-estado">
+        ${fila(ia.opencode, "<b>OpenCode</b> instalado",
+          `<pre class="cmd" onclick="copiar(this.textContent)">npm install -g opencode-ai</pre>`)}
+        ${fila(ia.opencode_configurado, "Configuración del proyecto (<code>opencode.json</code>)")}
+      </ul>
+      <p class="nota">Detalles en la guía <code>docs/CONFIGURACION.md</code>, paso 1.</p>
+    </details>
+    <div style="margin-top:14px"><button class="btn" onclick="recomprobarIA(this)">🔄 Volver a comprobar</button></div>`;
+}
+async function crearConfigGemini(boton){
+  boton.disabled = true;
+  const resp = await setupPost("ia/gemini", {});
+  toast((resp.ok ? "✅ " : "⚠️ ") + resp.mensaje);
+  renderAsistente();
+}
+async function recomprobarIA(boton){
+  boton.disabled = true; await cargarSetup(); renderAsistente(); toast("Comprobado");
+}
+
+/* ── Vuelta de Google (?google=ok|error&mensaje=…) ── */
+function leerVueltaGoogle(){
+  const q = new URLSearchParams(location.search);
+  if (!q.has("google")) return null;
+  history.replaceState(null, "", "/");
+  return {ok: q.get("google") === "ok", mensaje: q.get("mensaje") || ""};
+}
+
+/* ── Arranque ── */
+async function arrancar(){
+  const vuelta = leerVueltaGoogle();
+  await cargarSetup();
+  await cargar();
+  renderAvisoModo();
+  if (vuelta){
+    ERROR_GOOGLE = vuelta.ok ? null : vuelta.mensaje;
+    toast((vuelta.ok ? "✅ " : "⚠️ ") + vuelta.mensaje);
+    abrirAsistente(vuelta.ok && !SETUP.datos.hecho ? "datos" : "google");
+  } else if (SETUP.primer_uso){
+    mostrarBienvenida();
+  } else if (SETUP.modo === "real" && !SETUP.completo){
+    abrirAsistente();
+  }
+}
+
+function abrirConfiguracion(){
+  if (SETUP && SETUP.modo === "demo") confirmarDatosReales(); else abrirAsistente();
+}
+
+arrancar().catch(err => {
   document.getElementById("contenido").innerHTML =
     `<div class="tarjeta"><h3>No se pudo conectar con el servidor local</h3>
      <p class="nota">Cierre esta pestaña y vuelva a abrir el panel con su icono habitual.</p></div>`;

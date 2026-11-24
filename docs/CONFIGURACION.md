@@ -5,6 +5,11 @@
 > Todo lo que el sistema guarda queda en tu PC. Si prefieres ver el panorama
 > general antes de los pasos, empieza por el [README](../README.md).
 
+> 🧭 **La forma más fácil**: haz el *Paso 0*, abre el panel (`Panel de Gestion.bat`)
+> y pulsa **🚀 Empezar con mis datos**. Un asistente visual te lleva por los
+> pasos 2, 3 y 4 de esta guía (y te dice qué falta del 1) sin abrir la consola.
+> Esta guía es la referencia detallada y la vía manual.
+
 ## Índice
 
 - [Paso 0: requisitos](#paso-0-requisitos)
@@ -28,12 +33,24 @@
 | Una **cuenta de Google** | Tu correo (personal `@gmail.com` o corporativo de Workspace) |
 | Un **Excel con tus clientes** | El formato exacto lo pide el importador (ver Paso 4) |
 
-Crea el entorno virtual e instala las dependencias:
+### Instala el proyecto (una sola vez)
+
+Abre un terminal (PowerShell o «Símbolo del sistema») **en la carpeta del
+proyecto** y ejecuta:
 
 ```powershell
 python -m venv .venv
 .venv\Scripts\pip install -r requirements.txt
 ```
+
+La primera línea crea la carpeta **`.venv`**: un Python propio del proyecto
+con sus librerías (si vienes de Node, es el `node_modules` del proyecto) y la
+segunda las instala (el `npm install`). `.venv` no va al git, así que hay que
+crearla en cada equipo donde se instale el proyecto.
+
+> ⚠️ Todos los `.bat` (`Panel de Gestion.bat`, `Importar Clientes.bat`…) usan
+> `.venv\Scripts\python.exe`. Si no has hecho este paso, Windows mostrará
+> *«No se puede encontrar el archivo .venv\Scripts\python.exe»*.
 
 ---
 
@@ -132,16 +149,37 @@ OpenCode a él (`/connect` → Ollama). Requiere un PC con suficiente memoria.
 └──────────┘
 ```
 
+### Desde el panel (recomendado)
+
+Panel → **⚙️ Configuración** → paso **Conectar Google**. El asistente:
+
+1. Te guía por Google Cloud con enlaces directos a cada pantalla (los mismos
+   pasos que el apartado *a* de abajo) y te deja marcar cada uno como hecho.
+2. Te pide **arrastrar el `client_secret_….json`** que descargas: comprueba que
+   es del tipo correcto y lo guarda como `mcp-gmail/credentials.json`.
+3. Con **Conectar con Google** abre la web de Google; al aceptar vuelves al
+   panel, que guarda el token en `mcp-gmail/token.json` y comprueba que has
+   concedido **todos** los permisos.
+
+Es el mismo OAuth que hace `autorizar.py`, pero sin consola. **Probar la
+conexión** detecta si el acceso ha caducado.
+
 ### a) Crear la credencial en Google Cloud (una sola vez)
 
 1. Entra en [Google Cloud Console](https://console.cloud.google.com) y crea un **proyecto** nuevo (p. ej. "Gestor Comercial").
 2. **APIs y servicios → Biblioteca**: habilita **Gmail API** y **Google Calendar API**.
-3. **APIs y servicios → Pantalla de consentimiento OAuth**:
-   - Tipo de usuario: **Externo** (o Interno si tu Workspace lo permite).
-   - Rellena el nombre de la app y tu correo. Publicar en modo **Testing** es suficiente.
-4. **Credenciales → Crear credencial → ID de cliente OAuth** → tipo **Aplicación de escritorio**.
-5. Descarga el JSON y guárdalo como `mcp-gmail/credentials.json`
-   (el `.gitignore` ya lo excluye: nunca va al git ni a GitHub).
+3. **Google Auth Platform** ([enlace](https://console.cloud.google.com/auth/overview)) → **Comenzar**:
+   - Nombre de la app y tu correo de asistencia.
+   - Público: **Externo** (o Interno si tu Workspace lo permite).
+4. **Público → Publicar app** ([enlace](https://console.cloud.google.com/auth/audience)).
+   Si la dejas en modo **Prueba** (*Testing*), Google caduca el acceso **cada
+   7 días**. Publicada pero sin verificar funciona igual (Google muestra el aviso
+   de «app no verificada» y admite hasta 100 usuarios: de sobra para uso
+   personal). Con público **Interno** no hace falta.
+5. **Clientes → Crear cliente** ([enlace](https://console.cloud.google.com/auth/clients)) → tipo **App de escritorio**.
+6. En la ventana que aparece, **Descargar JSON** (solo se puede en ese momento)
+   y guárdalo como `mcp-gmail/credentials.json` (o súbelo desde el asistente).
+   El `.gitignore` ya lo excluye: nunca va al git ni a GitHub.
 
 ### b) Autorizar la app
 
@@ -161,10 +199,10 @@ Los permisos que se piden son **mínimos y verificables**:
 | `gmail.compose` | Crear **borradores** | **Enviar** correos |
 | `calendar.events` | Crear/listar/mover citas | Borrar tu calendario |
 
-> ⚠️ **Aviso honesto sobre caducidad**: con la pantalla de consentimiento en
-> modo *Testing*, Google caduca el token cada **7 días** y hay que repetir el
-> paso (b). Es una política de Google para apps no verificadas; al llegar la
-> fecha, el sistema lo avisa y basta con re-ejecutar `autorizar.py`.
+> ⚠️ **Aviso honesto sobre caducidad**: si la app sigue en modo *Prueba*
+> (*Testing*), Google caduca el token cada **7 días** y hay que volver a
+> conectar. Se evita publicándola (paso 4 del apartado *a*); después, vuelve
+> a conectar una vez para obtener un token sin caducidad semanal.
 > Si aparece la pantalla *"Google no ha verificado esta app"*, es normal para
 > tu propia app: clic en *Configuración avanzada* → *Ir a <tu app> (no
 > seguro)* → revisa los permisos → Permitir.
@@ -184,7 +222,9 @@ y borra `mcp-gmail/token.json`. Sin rastros.
 
 ## Paso 3: personaliza tu configuración
 
-Copia `datos/config.example.json` → `datos/config.json` y rellena:
+**Desde el panel**: ⚙️ Configuración → **Tus datos** (formulario; el email se
+rellena solo con la cuenta de Google conectada). **A mano**: copia
+`datos/config.example.json` → `datos/config.json` y rellena:
 
 - `asesor`: **tu** nombre, cargo y email (aparecen en el panel y en las firmas de los borradores).
 - `empresa`: nombre, **dominios** de correo de tu empresa (para clasificar mails internos) y los **contactos** de cada departamento (averías, administración, facturación...) que el agente incluirá en las derivaciones.
@@ -196,6 +236,13 @@ Copia `datos/config.example.json` → `datos/config.json` y rellena:
 ---
 
 ## Paso 4: importa tu cartera de clientes
+
+**Desde el panel**: ⚙️ Configuración → **Tus clientes** → *Descargar plantilla
+Excel*, pega tus clientes (columnas `CÓD`, `NOMBRE`, `DOMICILIO`, `POBLACIÓN`,
+`E-MAIL`, `TELÉFONO`) y arrástrala al recuadro. Verás cuántos se importaron,
+cuántos tienen email/teléfono y los posibles duplicados.
+
+**A mano**:
 
 1. Deja tu Excel en la carpeta `entrada/`.
 2. Doble clic en **`Importar Clientes.bat`** (o `python scripts/importar_clientes.py`).
@@ -215,10 +262,12 @@ depende de tu formato.
 
 Doble clic en **`Panel de Gestion.bat`** → se abre `http://127.0.0.1:8765`.
 
-> 🧪 **¿Quieres probar antes de importar nada real?** Ejecuta
-> `python scripts/demo_data.py`: genera una cartera **ficticia** (clientes,
-> seguimientos, presupuestos, citas...) para explorar el panel sin riesgo.
-> Cuando importes tu cartera real, la sustituye.
+> 🧪 **¿Quieres probar antes de importar nada real?** La primera vez que
+> abres el panel, elige **Probar con datos de ejemplo**: carga una cartera
+> **ficticia** (clientes, seguimientos, presupuestos, citas...) para explorarlo
+> sin riesgo (también con `python scripts/demo_data.py`). Una franja amarilla
+> te recuerda que es la demo; **Empezar con mis datos** la archiva en
+> `datos/archivo/demo_<fecha>/` (no se borra) y abre el asistente.
 
 - **Pendientes**: mails nuevos clasificados, urgentes arriba.
 - **Borradores**: lo que el agente preparó para que revises y envíes.
@@ -246,8 +295,10 @@ También puedes ejecutarla a mano con **`Procesar Ahora.bat`** (ve el progreso).
 
 | Síntoma | Causa probable | Solución |
 |---|---|---|
-| `No hay token de acceso` | No has autorizado aún | Ejecuta `mcp-gmail/autorizar.py` |
-| El agente deja de leer mails a los 7 días | Token caducado (modo Testing) | Repite `autorizar.py` |
+| *«No se puede encontrar el archivo .venv\Scripts\python.exe»* al abrir un `.bat` | Falta la carpeta `.venv` (no va al git) | Haz el Paso 0 → *Instala el proyecto* |
+| `No hay token de acceso` | No has conectado Google aún | Panel → ⚙️ Configuración → Conectar Google (o `mcp-gmail/autorizar.py`) |
+| El agente deja de leer mails a los 7 días | App en modo *Prueba* (Testing) en Google Cloud | Publica la app (Paso 2a, punto 4) y vuelve a conectar |
+| El asistente dice *«Faltan permisos»* | Desmarcaste alguna casilla en la pantalla de Google | Vuelve a conectar y marca todas las casillas |
 | *"Google no ha verificado esta app"* | Tu app no está verificada (normal) | Configuración avanzada → Ir a tu app → Permitir |
 | `No model is available` | Runtime sin proveedor conectado | Repite el Paso 1 (`/connect` o login de Gemini CLI) |
 | El panel no abre / `8765` ocupado | Quedó un proceso viejo | `netstat -ano \| findstr :8765` → mata el PID escuchando |

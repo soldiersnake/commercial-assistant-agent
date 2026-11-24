@@ -340,12 +340,23 @@ class ListEvents(ConCalendar):
         kw = self.events.list.call_args.kwargs
         self.assertEqual(kw["calendarId"], "primary")
         self.assertEqual(kw["maxResults"], 50)
-        self.assertTrue(kw["timeMin"].startswith("2026-12-01T00:00:00"))
-        self.assertTrue(kw["timeMax"].startswith("2026-12-08T23:59:59"))
+        self.assertEqual(kw["timeMin"], "2026-12-01T00:00:00+01:00")  # invierno
+        self.assertEqual(kw["timeMax"], "2026-12-08T23:59:59+01:00")
         self.assertTrue(kw["singleEvents"])
         e1, e2 = datos["eventos"]
         self.assertEqual(e1["titulo"], "(sin título)")
         self.assertEqual(e2["inicio"], "2026-12-08")
+
+    def test_offset_de_verano_y_cambio_de_hora(self):
+        self.events.list.return_value.execute.return_value = {}
+        llamar("calendar_list_events", desde="2026-07-01", hasta="2026-07-02")
+        kw = self.events.list.call_args.kwargs
+        self.assertEqual(kw["timeMin"], "2026-07-01T00:00:00+02:00")
+        # rango que cruza el cambio de hora (25-oct-2026): cada extremo con el suyo
+        llamar("calendar_list_events", desde="2026-10-24", hasta="2026-10-26")
+        kw = self.events.list.call_args.kwargs
+        self.assertEqual(kw["timeMin"], "2026-10-24T00:00:00+02:00")
+        self.assertEqual(kw["timeMax"], "2026-10-26T23:59:59+01:00")
 
 
 class UpdateEvent(ConCalendar):
@@ -384,6 +395,32 @@ class UpdateEvent(ConCalendar):
         ev = self._enviado()
         self.assertEqual(ev["start"]["dateTime"], "2026-12-05T09:30:00")
         self.assertEqual(ev["end"]["dateTime"], "2026-12-05T10:15:00")
+
+    def test_solo_hora_mantiene_el_dia_y_la_duracion(self):
+        # bug corregido: pasar solo 'hora' no movía la cita
+        self._evento("2026-12-01T10:00:00+01:00", "2026-12-01T11:30:00+01:00")
+        llamar("calendar_update_event", event_id="e1", hora="17:00")
+        ev = self._enviado()
+        self.assertEqual(ev["start"]["dateTime"], "2026-12-01T17:00:00")
+        self.assertEqual(ev["end"]["dateTime"], "2026-12-01T18:30:00")
+
+    def test_evento_de_dia_completo_pasa_a_tener_hora(self):
+        self.events.get.return_value.execute.return_value = {
+            "id": "e1", "start": {"date": "2026-12-01"},
+            "end": {"date": "2026-12-02"}}
+        self.events.update.return_value.execute.return_value = {"id": "e1"}
+        llamar("calendar_update_event", event_id="e1", hora="10:00")
+        ev = self._enviado()
+        self.assertNotIn("date", ev["start"])
+        self.assertNotIn("date", ev["end"])
+        self.assertEqual(ev["start"]["dateTime"], "2026-12-01T10:00:00")
+        self.assertEqual(ev["end"]["dateTime"], "2026-12-01T11:00:00")
+
+    def test_solo_hora_sin_fecha_conocida_no_actualiza(self):
+        self.events.get.return_value.execute.return_value = {"id": "e1"}
+        datos = llamar("calendar_update_event", event_id="e1", hora="10:00")
+        self.assertFalse(datos["ok"])
+        self.assertFalse(self.events.update.called)
 
     def test_duracion_explicita_manda(self):
         self._evento("2026-12-01T10:00:00+01:00", "2026-12-01T11:00:00+01:00")
